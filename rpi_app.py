@@ -1,4 +1,3 @@
-
 from flask import Flask, request, render_template
 import time
 import datetime
@@ -29,33 +28,34 @@ def lab_datas():
         return render_template("sensor_error.html")
 
 # route to get datas from the db
-@app.route("/lab_datas_db")
+@app.route("/lab_datas_db", methods=['GET'])
 def lab_datas_db():
-    from_date   = request.args.get('from',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
-    to_date     = request.args.get('to',time.strftime("%Y-%m-%d %H:%M"))   #Get the to date value from the URL
-    
+    from_date = request.args.get('from', time.strftime("%Y-%m-%d %H:%M"))  # Get the from date value from the URL
+    to_date = request.args.get('to', time.strftime("%Y-%m-%d %H:%M"))  # Get the to date value from the URL
+
+    if not check_date(from_date):  # Validate date before sending it to the DB
+        from_date = time.strftime("%Y-%m-%d 00:00")
+    if not check_date(to_date):
+        to_date = time.strftime("%Y-%m-%d %H:%M")  # Validate date before sending it to the DB
+
     # connect to the db
     conn = sqlite3.connect('/var/www/rpi_app/rpi_app.db')
     curs = conn.cursor()
-
-    # get data from 'temperatures' table
-    #curs.execute("SELECT * FROM temperatures")
-    #temperatures = curs.fetchall()
-
-    # get data from 'humidities' table
-    #curs.execute("SELECT * FROM humidities")
-    #humidities = curs.fetchall()
-
-    # close the db connection
-    #conn.close()
     curs.execute("SELECT * FROM temperatures WHERE timestamp BETWEEN ? AND ?", (from_date, to_date))
-    temperatures    = curs.fetchall()
+    temperatures = curs.fetchall()
     curs.execute("SELECT * FROM humidities WHERE timestamp BETWEEN ? AND ?", (from_date, to_date))
-    humidities              = curs.fetchall()
+    humidities = curs.fetchall()
     conn.close()
-
     return render_template("lab_datas_db.html", temp=temperatures, hum=humidities)
+
+def check_date(d):
+    try:
+        datetime.datetime.strptime(d, '%Y-%m-%d %H:%M')
+        return True
+    except ValueError:
+        return False
 
 # to run the app on port 8080
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)
+
