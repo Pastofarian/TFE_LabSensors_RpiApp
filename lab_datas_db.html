@@ -1,0 +1,78 @@
+<!DOCTYPE html> 
+<html lang="fr"> 
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Lab Conditions by Raspberry Pi</title>
+    <meta name="description" content="Lab conditions monitored by Raspberry Pi">
+    <meta name="author" content="Christophe Aseglio">
+    
+    <!-- Font and CSS Links -->
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/assets/css/normalize.css">
+    <link rel="stylesheet" href="/assets/css/skeleton.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+  </head>
+  
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="one-third column content-wrapper">
+          <header>
+            <h1>Conditions climatiques</h1>
+            <p><strong>Affichage de tous les enregistrements</strong></p>
+          </header>
+          
+          <!-- Temperature Table -->
+          <section>
+            <h2>Températures</h2>
+            <table class="u-full-width">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Température (&deg;C)</th>                        
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in temp %}
+                <tr>
+                  <td>{{ row[0] }}</td>
+                  <td>{{ '%0.2f'|format(row[2]) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </section>
+          
+          <!-- Humidity Table -->
+          <section>
+            <h2>Humidités</h2>
+            <table class="u-full-width">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Humidité (%)</th>                        
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in hum %}
+                <tr>
+                  <td>{{ row[0] }}</td>
+                  <td>{{ '%0.2f'|format(row[2]) }}</td>
+                </tr>          
+                {% endfor %}
+              </tbody>
+            </table>
+          </section>
+          
+        </div>
+      </div>           
+    </div>
+  </body>
+</html>
+
