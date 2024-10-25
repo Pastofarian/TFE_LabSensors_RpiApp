@@ -1,6 +1,10 @@
+
 from flask import Flask, request, render_template
-import sqlite3  
-import Adafruit_DHT  
+import time
+import datetime
+import sys
+import sqlite3
+import Adafruit_DHT
 
 # create an instance of the Flask app
 app = Flask(__name__)
@@ -27,21 +31,29 @@ def lab_datas():
 # route to get datas from the db
 @app.route("/lab_datas_db")
 def lab_datas_db():
+    from_date   = request.args.get('from',time.strftime("%Y-%m-%d %H:%M")) #Get the from date value from the URL
+    to_date     = request.args.get('to',time.strftime("%Y-%m-%d %H:%M"))   #Get the to date value from the URL
+    
     # connect to the db
     conn = sqlite3.connect('/var/www/rpi_app/rpi_app.db')
     curs = conn.cursor()
-    
+
     # get data from 'temperatures' table
-    curs.execute("SELECT * FROM temperatures")
-    temperatures = curs.fetchall()
-    
+    #curs.execute("SELECT * FROM temperatures")
+    #temperatures = curs.fetchall()
+
     # get data from 'humidities' table
-    curs.execute("SELECT * FROM humidities")
-    humidities = curs.fetchall()
-    
+    #curs.execute("SELECT * FROM humidities")
+    #humidities = curs.fetchall()
+
     # close the db connection
+    #conn.close()
+    curs.execute("SELECT * FROM temperatures WHERE timestamp BETWEEN ? AND ?", (from_date, to_date))
+    temperatures    = curs.fetchall()
+    curs.execute("SELECT * FROM humidities WHERE timestamp BETWEEN ? AND ?", (from_date, to_date))
+    humidities              = curs.fetchall()
     conn.close()
-    
+
     return render_template("lab_datas_db.html", temp=temperatures, hum=humidities)
 
 # to run the app on port 8080
