@@ -1,0 +1,25 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE temperatures (
+    timestamp datetime,
+    sensor_id text,
+    temperature numeric
+);
+INSERT INTO temperatures VALUES('2024-10-25 12:18:58','1',21.299999237060546875);
+INSERT INTO temperatures VALUES('2024-10-25 12:36:02','1',21.399999618530273438);
+INSERT INTO temperatures VALUES('2024-10-25 12:37:01','1',21.399999618530273438);
+INSERT INTO temperatures VALUES('2024-10-25 12:38:01','1',21.399999618530273438);
+INSERT INTO temperatures VALUES('2024-10-25 12:39:02','1',21.5);
+INSERT INTO temperatures VALUES('2024-10-25 12:40:02','1',21.5);
+CREATE TABLE humidities (
+    timestamp datetime,
+    sensor_id text,
+    humidities numeric
+);
+INSERT INTO humidities VALUES('2024-10-25 12:18:58','1',60.5);
+INSERT INTO humidities VALUES('2024-10-25 12:36:02','1',61.5);
+INSERT INTO humidities VALUES('2024-10-25 12:37:01','1',61.799999237060546875);
+INSERT INTO humidities VALUES('2024-10-25 12:38:01','1',62);
+INSERT INTO humidities VALUES('2024-10-25 12:39:02','1',61.799999237060546875);
+INSERT INTO humidities VALUES('2024-10-25 12:40:02','1',61.799999237060546875);
+COMMIT;
