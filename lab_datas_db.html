@@ -20,23 +20,23 @@
 
   <body>
     <div class="container">
-      <!-- Datetimepicker form start -->
-      <div class="row">
-        <form id="datetime_range" action="/lab_datas_db" method="GET"> 
+            <!-- Datetimepicker form start -->
+        <div class="row">
+            <form id="datetime_range" action="/lab_datas_db" method="GET"> 
             <div class="three columns">
-              <label for="from">Depuis le</label>
-              <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from">
+                <label for="from">Depuis le</label>
+                <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from">
             </div>        
             <div class="three columns">
-              <label for="to">À</label>           
-              <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to">
+                <label for="to">À</label>           
+                <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to">
             </div>           
             <div class="two columns">           
-              <input class="button-primary" type="submit" value="Valider" style="position:relative; top: 28px" id="submit_button" />
+                <input class="button-primary" type="submit" value="Valider" style="position:relative; top: 28px" id="submit_button" />
             </div>        
-        </form> 
-      </div>
-    <!-- Datetimepicker form end -->
+            </form> 
+        </div>
+        <!-- Datetimepicker form end -->
       <div class="row">
         <div class="twelve columns">
           <header>
@@ -46,6 +46,7 @@
 
           <!-- Form radio buttons -->
           <form id="range_select" action="/lab_datas_db" method="GET">
+            <input type="hidden" class="timezone" name="timezone" /> <!-- Timezone info -->
             <div class="row">
               <div class="one column">
                 <input type="radio" name="range_time" value="3" id="radio_3" {% if range_time == '3' %}checked{% endif %}/><label for="radio_3">3h</label>
@@ -131,16 +132,30 @@
     <!-- Datetimepicker files start -->
   <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.css"/ >
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.full.min.js"></script>
+  
+     <!-- jstimezonedetect script start -->
+     <script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.7/jstz.min.js" ></script>
+     <script>
+     //This code is for the datetime range form
+     jQuery( "#datetime_range" ).submit(function( event ) {
+         timezone = jstz.determine();
+         jQuery(".timezone").val(timezone.name());
+     });
+     </script>
+     <!-- jstimezonedetect script end -->
+  
   <script>
     jQuery('#datetimepicker1').datetimepicker(
       {
-        format:'Y-m-d H:i:s',
+        format:'d-m-Y H:i:s',
       });
     jQuery('#datetimepicker2').datetimepicker({
-        format:'Y-m-d H:i:s',
+        format:'d-m-Y H:i:s',
       });
 
       jQuery("#range_select input[type=radio]").click(function(){ 
+        timezone = jstz.determine();                // Datetimepicker code
+        jQuery(".timezone").val(timezone.name());   // Datetimepicker code
         jQuery("#range_select").submit();
       });
   </script>
@@ -160,59 +175,78 @@
         data.addColumn('number', 'Température');
 
         data.addRows([
-          {% for row in temp %}
-            [new Date({{row[0][0:4]}}, {{row[0][5:7]|int - 1}}, {{row[0][8:10]}}, {{row[0][11:13]}}, {{row[0][14:16]}}), {{row[2]|float}}],
-          {% endfor %}
+            {% for row in temp %}
+                [
+                    new Date(
+                        {{ row[0][6:10] }},           // Year
+                        {{ row[0][3:5]|int - 1 }},    // Month (0-indexed)
+                        {{ row[0][0:2] }},            // Day
+                        {{ row[0][11:13] }},          // Hour
+                        {{ row[0][14:16] }}           // Minute
+                    ), 
+                    {{ row[2]|float }}
+                ],
+            {% endfor %}
         ]);
 
         var options = {
-          width: 600,
-          height: 300,
-          hAxis: {
-            title: "Date",
-            format: 'dd-MMM-yyyy HH:mm',
-            gridlines: { count: {{temp_items}},color: '#CCC' }
-          },
-          vAxis: {
-            title: 'Température (°C)'
-          },
-          title: 'Température',
-          curveType: 'function'
+            width: 600,
+            height: 300,
+            hAxis: {
+                title: "Date",
+                format: 'dd-MMM-yyyy HH:mm',
+                gridlines: { count: {{ temp_items }}, color: '#CCC' }
+            },
+            vAxis: {
+                title: 'Température (°C)'
+            },
+            title: 'Température',
+            curveType: 'function'
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('graph_temp'));
         chart.draw(data, options);
-      }
+    }
 
-      function createHumChart() {
+    function createHumChart() {
         var data = new google.visualization.DataTable();
         data.addColumn('datetime', 'Heure');
         data.addColumn('number', 'Humidité');
 
         data.addRows([
-          {% for row in hum %}
-            [new Date({{row[0][0:4]}}, {{row[0][5:7]|int - 1}}, {{row[0][8:10]}}, {{row[0][11:13]}}, {{row[0][14:16]}}), {{row[2]|float}}],
-          {% endfor %}
+            {% for row in hum %}
+                [
+                    new Date(
+                        {{ row[0][6:10] }},           // Year
+                        {{ row[0][3:5]|int - 1 }},    // Month (0-indexed)
+                        {{ row[0][0:2] }},            // Day
+                        {{ row[0][11:13] }},          // Hour
+                        {{ row[0][14:16] }}           // Minute
+                    ), 
+                    {{ row[2]|float }}
+                ],
+            {% endfor %}
         ]);
 
         var options = {
-          width: 600,
-          height: 300,
-          hAxis: {
-            title: "Date",
-            format: 'dd-MMM-yyyy HH:mm',
-            gridlines: { count: {{hum_items}}, color: '#CCC' }
-          },
-          vAxis: {
-            title: 'Humidité (%)'
-          },
-          title: 'Humidité',
-          curveType: 'function'
+            width: 600,
+            height: 300,
+            hAxis: {
+                title: "Date",
+                format: 'dd-MMM-yyyy HH:mm',
+                gridlines: { count: {{ hum_items }}, color: '#CCC' }
+            },
+            vAxis: {
+                title: 'Humidité (%)'
+            },
+            title: 'Humidité',
+            curveType: 'function'
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('graph_humid'));
         chart.draw(data, options);
-      }
+    }
+
     </script>
     <!-- Google charts JS end -->
   </body>
