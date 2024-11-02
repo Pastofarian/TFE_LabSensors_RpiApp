@@ -17,62 +17,91 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
-  </head>
-  
-  <body>
-    <div class="container">
-      <div class="row">
-        <div class="one-third column content-wrapper">
-          <header>
-            <h1>Conditions climatiques</h1>
-            <p><strong>Affichage de tous les enregistrements</strong></p>
-          </header>
-          
-          <!-- Temperature Table -->
-          <section>
-            <h2>Températures</h2>
-            <table class="u-full-width">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Température (&deg;C)</th>                        
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in temp %}
-                <tr>
-                  <td>{{ row[0] }}</td>
-                  <td>{{ '%0.2f'|format(row[2]) }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </section>
-          
-          <!-- Humidity Table -->
-          <section>
-            <h2>Humidités</h2>
-            <table class="u-full-width">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Humidité (%)</th>                        
-                </tr>
-              </thead>
-              <tbody>
-                {% for row in hum %}
-                <tr>
-                  <td>{{ row[0] }}</td>
-                  <td>{{ '%0.2f'|format(row[2]) }}</td>
-                </tr>          
-                {% endfor %}
-              </tbody>
-            </table>
-          </section>
-          
-        </div>
-      </div>           
-    </div>
-  </body>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="one-third column content-wrapper">
+        <header>
+          <h1>Conditions climatiques</h1>
+          <p><strong>Affichage des enregistrements</strong></p>
+        </header>
+
+        <!-- Form Radio Buttons -->
+        <form id="range_select" action="/lab_datas_db" method="GET">
+          <div class="row">
+            <div class="one column">
+              <input type="radio" name="range_time" value="3" id="radio_3" /><label for="radio_3">3h</label>
+            </div>
+            <div class="one column">
+              <input type="radio" name="range_time" value="6" id="radio_6" /><label for="radio_6">6h</label>
+            </div>
+            <div class="one column">
+              <input type="radio" name="range_time" value="12" id="radio_12" /><label for="radio_12">12h</label>
+            </div>
+            <div class="one column">
+              <input type="radio" name="range_time" value="24" id="radio_24" /><label for="radio_24">24h</label>
+            </div>
+          </div>
+        </form>
+
+        <!-- Datas section-->
+        <!-- Temperature Table -->
+        <section>
+          <h2>Températures</h2>
+          <table class="u-full-width">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Température (&deg;C)</th>                        
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in temp %}
+              <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ '%0.2f'|format(row[2]) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Humidity Table -->
+        <section>
+          <h2>Humidités</h2>
+          <table class="u-full-width">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Humidité (%)</th>                        
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in hum %}
+              <tr>
+                <td>{{ row[0] }}</td>
+                <td>{{ '%0.2f'|format(row[2]) }}</td>
+              </tr>          
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+
+      </div>
+    </div>           
+  </div>
+
+  <!-- jQuery -->
+  <script src="//code.jquery.com/jquery-3.7.1.slim.min.js"></script>
+  <script>
+    jQuery("#range_select input[type=radio]").click(function(){
+      jQuery("#range_select").submit();
+    });
+  </script>
+</body>
 </html>
+
+
 
