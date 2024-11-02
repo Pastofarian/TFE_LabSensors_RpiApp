@@ -27,39 +27,52 @@ def lab_datas():
         # if the sensor fails, show a page indicating no sensor data
         return render_template("sensor_error.html")
 
-# route to get datas from the db
+# route to get data from the db
 @app.route("/lab_datas_db", methods=['GET'])
 def lab_datas_db():
     temperatures, humidities, from_date, to_date = get_datas()
-    return render_template("lab_datas_db.html", temp=temperatures, hum=humidities, temp_items=len(temperatures), hum_items=len(humidities))
-    #return render_template("lab_datas_db.html", temp=temperatures, hum=humidities)
+    return render_template(
+        "lab_datas_db.html",
+        temp=temperatures,
+        hum=humidities,
+        start_date=from_date,
+        end_date=to_date,
+        temp_items=len(temperatures),
+        hum_items=len(humidities),
+    )
 
 def get_datas():
     from_date = request.args.get('from')  # Get the from date value from URL
     to_date = request.args.get('to')      # Get the to date value from URL
     range_time_form = request.args.get('range_time', '')  # Get 'range_time' from URL
 
-    range_time_int = None  # Initialise range_time_int with None
-
     try:
         range_time_int = int(range_time_form)
     except ValueError:
-        print("range_time_form not a number")
-
+        range_time_int = None
+        print("range_time_form not valid")
+        
     if range_time_int is not None:
-        # If range_time is valid I calculate from_date and to_date
+        # if range_time is valid, calculate from_date and to_date
         time_now = datetime.datetime.now()
         time_from = time_now - datetime.timedelta(hours=range_time_int)
         from_date = time_from.strftime("%Y-%m-%d %H:%M:%S")
         to_date = time_now.strftime("%Y-%m-%d %H:%M:%S")
     else:
-        # If range_time is not valid, I use the default dates
-        if not from_date or not check_date(from_date):
+    # If range_time is not valid, I use the default dates
+        if not check_date(from_date):
             from_date = time.strftime("%Y-%m-%d 00:00:00")  # Start at the beginning of the day
-        if not to_date or not check_date(to_date):
+        if not check_date(to_date):
             to_date = time.strftime("%Y-%m-%d %H:%M:%S")    # Until now
-
+            
     print(f"from_date: {from_date}, to_date: {to_date}")
+
+    # if isinstance(range_time_int, int):
+    #     time_now = datetime.datetime.now()
+    #     time_from = time_now - datetime.timedelta(hours=range_time_int)
+    #     time_to = time_now
+    #     from_date = time_from.strftime("%Y-%m-%d %H:%M:%S")
+    #     to_date = time_to.strftime("%Y-%m-%d %H:%M:%S")
 
     # Connect to the db
     conn = sqlite3.connect('/var/www/rpi_app/rpi_app.db')
@@ -71,16 +84,15 @@ def get_datas():
     conn.close()
     return [temperatures, humidities, from_date, to_date]
 
-
 def check_date(d):
     if not d:
         return False
     try:
         datetime.datetime.strptime(d, '%Y-%m-%d %H:%M:%S')
         return True
-    except ValueError:
+    except (ValueError, TypeError):
         return False
-
+    
 # to run the app on port 8080
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)

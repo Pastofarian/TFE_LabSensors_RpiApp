@@ -20,6 +20,23 @@
 
   <body>
     <div class="container">
+      <!-- Datetimepicker form start -->
+      <div class="row">
+        <form id="datetime_range" action="/lab_datas_db" method="GET"> 
+            <div class="three columns">
+              <label for="from">Depuis le</label>
+              <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from">
+            </div>        
+            <div class="three columns">
+              <label for="to">À</label>           
+              <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to">
+            </div>           
+            <div class="two columns">           
+              <input class="button-primary" type="submit" value="Valider" style="position:relative; top: 28px" id="submit_button" />
+            </div>        
+        </form> 
+      </div>
+    <!-- Datetimepicker form end -->
       <div class="row">
         <div class="twelve columns">
           <header>
@@ -111,6 +128,24 @@
       });
     </script>
 
+    <!-- Datetimepicker files start -->
+  <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.css"/ >
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.full.min.js"></script>
+  <script>
+    jQuery('#datetimepicker1').datetimepicker(
+      {
+        format:'Y-m-d H:i:s',
+      });
+    jQuery('#datetimepicker2').datetimepicker({
+        format:'Y-m-d H:i:s',
+      });
+
+      jQuery("#range_select input[type=radio]").click(function(){ 
+        jQuery("#range_select").submit();
+      });
+  </script>
+  <!-- Datetimepicker files end -->
+
     <!-- Google charts JS start -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
@@ -139,7 +174,7 @@
             gridlines: { count: {{temp_items}},color: '#CCC' }
           },
           vAxis: {
-            title: 'Température (&deg;C)'
+            title: 'Température (°C)'
           },
           title: 'Température',
           curveType: 'function'
