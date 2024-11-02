@@ -31,7 +31,8 @@ def lab_datas():
 @app.route("/lab_datas_db", methods=['GET'])
 def lab_datas_db():
     temperatures, humidities, from_date, to_date = get_datas()
-    return render_template("lab_datas_db.html", temp=temperatures, hum=humidities)
+    return render_template("lab_datas_db.html", temp=temperatures, hum=humidities, temp_items=len(temperatures), hum_items=len(humidities))
+    #return render_template("lab_datas_db.html", temp=temperatures, hum=humidities)
 
 def get_datas():
     from_date = request.args.get('from')  # Get the from date value from URL

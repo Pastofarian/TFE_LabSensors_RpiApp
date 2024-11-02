@@ -3,105 +3,183 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Lab Conditions by Raspberry Pi</title>
-    <meta name="description" content="Lab conditions monitored by Raspberry Pi">
+    <title>Conditions Climatiques du Labo</title>
+    <meta name="description" content="Conditions climatiques surveillées par Raspberry Pi">
     <meta name="author" content="Christophe Aseglio">
     
-    <!-- Font and CSS Links -->
+    <!-- Font and CSS links -->
     <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
 
-    <!-- CSS Files -->
+    <!-- CSS files -->
     <link rel="stylesheet" href="/assets/css/normalize.css">
     <link rel="stylesheet" href="/assets/css/skeleton.css">
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
-</head>
+  </head>
 
-<body>
-  <div class="container">
-    <div class="row">
-      <div class="one-third column content-wrapper">
-        <header>
-          <h1>Conditions climatiques</h1>
-          <p><strong>Affichage des enregistrements</strong></p>
-        </header>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <header>
+            <h1>Conditions climatiques</h1>
+            <p><strong>Affichage des enregistrements pour les dernières {{ range_time }} heures</strong></p>
+          </header>
 
-        <!-- Form Radio Buttons -->
-        <form id="range_select" action="/lab_datas_db" method="GET">
+          <!-- Form radio buttons -->
+          <form id="range_select" action="/lab_datas_db" method="GET">
+            <div class="row">
+              <div class="one column">
+                <input type="radio" name="range_time" value="3" id="radio_3" {% if range_time == '3' %}checked{% endif %}/><label for="radio_3">3h</label>
+              </div>
+              <div class="one column">
+                <input type="radio" name="range_time" value="6" id="radio_6" {% if range_time == '6' %}checked{% endif %}/><label for="radio_6">6h</label>
+              </div>
+              <div class="one column">
+                <input type="radio" name="range_time" value="12" id="radio_12" {% if range_time == '12' %}checked{% endif %}/><label for="radio_12">12h</label>
+              </div>
+              <div class="one column">
+                <input type="radio" name="range_time" value="24" id="radio_24" {% if range_time == '24' %}checked{% endif %}/><label for="radio_24">24h</label>
+              </div>
+            </div>
+          </form>
+
           <div class="row">
-            <div class="one column">
-              <input type="radio" name="range_time" value="3" id="radio_3" /><label for="radio_3">3h</label>
+            <!-- Tables section -->
+            <div class="six columns" style="margin-top: 5%">
+               <!-- Temperature table -->
+              <section>
+                <h2>Températures</h2>
+                <table class="u-full-width">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Température (&deg;C)</th>                        
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in temp %}
+                    <tr>
+                      <td>{{ row[0] }}</td>
+                      <td>{{ '%0.2f'|format(row[2]) }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- Humidity table -->
+              <section>
+                <h2>Humidités</h2>
+                <table class="u-full-width">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Humidité (%)</th>                        
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in hum %}
+                    <tr>
+                      <td>{{ row[0] }}</td>
+                      <td>{{ '%0.2f'|format(row[2]) }}</td>
+                    </tr>          
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </section>
             </div>
-            <div class="one column">
-              <input type="radio" name="range_time" value="6" id="radio_6" /><label for="radio_6">6h</label>
+
+            <!-- Chart section -->
+            <!-- Google charts code start -->
+            <div class="six columns" style="margin-top: 5%">
+              <div id="graph_temp"></div>
+              <div id="graph_humid"></div>
             </div>
-            <div class="one column">
-              <input type="radio" name="range_time" value="12" id="radio_12" /><label for="radio_12">12h</label>
-            </div>
-            <div class="one column">
-              <input type="radio" name="range_time" value="24" id="radio_24" /><label for="radio_24">24h</label>
-            </div>
+            <!-- Google charts code end -->
           </div>
-        </form>
+        </div>
+      </div>           
+    </div>
 
-        <!-- Datas section-->
-        <!-- Temperature Table -->
-        <section>
-          <h2>Températures</h2>
-          <table class="u-full-width">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Température (&deg;C)</th>                        
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in temp %}
-              <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ '%0.2f'|format(row[2]) }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </section>
+    <!-- jQuery -->
+    <script src="//code.jquery.com/jquery-3.7.1.slim.min.js"></script>
+    <script>
+      jQuery("#range_select input[type=radio]").click(function(){
+        jQuery("#range_select").submit();
+      });
+    </script>
 
-        <!-- Humidity Table -->
-        <section>
-          <h2>Humidités</h2>
-          <table class="u-full-width">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Humidité (%)</th>                        
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in hum %}
-              <tr>
-                <td>{{ row[0] }}</td>
-                <td>{{ '%0.2f'|format(row[2]) }}</td>
-              </tr>          
-              {% endfor %}
-            </tbody>
-          </table>
-        </section>
+    <!-- Google charts JS start -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-      </div>
-    </div>           
-  </div>
+    <script>
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(createTempChart);
+      google.charts.setOnLoadCallback(createHumChart);
 
-  <!-- jQuery -->
-  <script src="//code.jquery.com/jquery-3.7.1.slim.min.js"></script>
-  <script>
-    jQuery("#range_select input[type=radio]").click(function(){
-      jQuery("#range_select").submit();
-    });
-  </script>
-</body>
+      function createTempChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('datetime', 'Heure');
+        data.addColumn('number', 'Température');
+
+        data.addRows([
+          {% for row in temp %}
+            [new Date({{row[0][0:4]}}, {{row[0][5:7]|int - 1}}, {{row[0][8:10]}}, {{row[0][11:13]}}, {{row[0][14:16]}}), {{row[2]|float}}],
+          {% endfor %}
+        ]);
+
+        var options = {
+          width: 600,
+          height: 300,
+          hAxis: {
+            title: "Date",
+            format: 'dd-MMM-yyyy HH:mm',
+            gridlines: { count: {{temp_items}},color: '#CCC' }
+          },
+          vAxis: {
+            title: 'Température (&deg;C)'
+          },
+          title: 'Température',
+          curveType: 'function'
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('graph_temp'));
+        chart.draw(data, options);
+      }
+
+      function createHumChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('datetime', 'Heure');
+        data.addColumn('number', 'Humidité');
+
+        data.addRows([
+          {% for row in hum %}
+            [new Date({{row[0][0:4]}}, {{row[0][5:7]|int - 1}}, {{row[0][8:10]}}, {{row[0][11:13]}}, {{row[0][14:16]}}), {{row[2]|float}}],
+          {% endfor %}
+        ]);
+
+        var options = {
+          width: 600,
+          height: 300,
+          hAxis: {
+            title: "Date",
+            format: 'dd-MMM-yyyy HH:mm',
+            gridlines: { count: {{hum_items}}, color: '#CCC' }
+          },
+          vAxis: {
+            title: 'Humidité (%)'
+          },
+          title: 'Humidité',
+          curveType: 'function'
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('graph_humid'));
+        chart.draw(data, options);
+      }
+    </script>
+    <!-- Google charts JS end -->
+  </body>
 </html>
-
-
 
