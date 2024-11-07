@@ -1,42 +1,63 @@
-<!DOCTYPE html> 
-<html lang="fr"> 
+<html lang="fr">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conditions Climatiques du Labo</title>
     <meta name="description" content="Conditions climatiques surveillées par Raspberry Pi">
     <meta name="author" content="Christophe Aseglio">
-    
+
     <!-- Font and CSS links -->
     <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
 
     <!-- CSS files -->
     <link rel="stylesheet" href="/assets/css/normalize.css">
     <link rel="stylesheet" href="/assets/css/skeleton.css">
-    
-    <!-- Favicon -->
+
+    <!-- favicon -->
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
   </head>
 
   <body>
     <div class="container">
-            <!-- Datetimepicker form start -->
-        <div class="row">
-            <form id="datetime_range" action="/lab_datas_db" method="GET"> 
-            <div class="three columns">
-                <label for="from">Depuis le</label>
-                <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from">
-            </div>        
-            <div class="three columns">
-                <label for="to">À</label>           
-                <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to">
-            </div>           
-            <div class="two columns">           
-                <input class="button-primary" type="submit" value="Valider" style="position:relative; top: 28px" id="submit_button" />
-            </div>        
-            </form> 
+      <!-- Datetimepicker form start -->
+      <div class="row">
+        <form id="datetime_range" action="/lab_datas_db" method="GET">
+          <div class="three columns">
+            <label for="from">Depuis le</label>
+            <!-- datetimepicker for start date -->
+            <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from">
+          </div>
+          <div class="three columns">
+            <label for="to">À</label>
+            <!-- datetimepicker for end date -->
+            <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to">
+          </div>
+          <div class="two columns">
+            <!-- submit button for form -->
+            <input class="button-primary" type="submit" value="Valider" style="position:relative; top: 28px" id="submit_button" />
+          </div>
+        </form>
+      </div>
+      <!-- Datetimepicker form end -->
+
+      <!-- Link to current temp and hum start -->
+      <div class="row">
+        <div class="twelve columns" style="margin-bottom: 20px;">
+          <!-- link to current live temperature and humidity -->
+          <a href="/lab_datas" style="position:relative; top:15px">Conditions climatiques actuelles</a>
         </div>
-        <!-- Datetimepicker form end -->
+      </div>
+      <!-- Link to current temp and hum end -->
+
+      <!-- Link to plotly start -->
+      <div class="row">
+        <div class="twelve columns" style="margin-bottom: 20px;">
+          <!-- link to generate plotly graph -->
+          <a href="" id="plotly" style="position:relative; top:15px">Créer un graphique avec Plotly</a>
+        </div>
+      </div>
+      <!-- Link to plotly end -->
+
       <div class="row">
         <div class="twelve columns">
           <header>
@@ -46,8 +67,10 @@
 
           <!-- Form radio buttons -->
           <form id="range_select" action="/lab_datas_db" method="GET">
-            <input type="hidden" class="timezone" name="timezone" /> <!-- Timezone info -->
+            <!-- hidden input for timezone info -->
+            <input type="hidden" class="timezone" name="timezone" />
             <div class="row">
+              <!-- radio buttons for range selection -->
               <div class="one column">
                 <input type="radio" name="range_time" value="3" id="radio_3" {% if range_time == '3' %}checked{% endif %}/><label for="radio_3">3h</label>
               </div>
@@ -64,16 +87,21 @@
           </form>
 
           <div class="row">
+            <!-- dynamic link for plotly graph -->
+            <a href="" id="plotly_url" target="_blank"></a><span id="plotly_wait"></span>
+          </div>
+
+          <div class="row">
             <!-- Tables section -->
             <div class="six columns" style="margin-top: 5%">
-               <!-- Temperature table -->
+              <!-- Temperature table -->
               <section>
                 <h2>Températures</h2>
                 <table class="u-full-width">
                   <thead>
                     <tr>
                       <th>Date</th>
-                      <th>Température (&deg;C)</th>                        
+                      <th>Température (&deg;C)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -94,7 +122,7 @@
                   <thead>
                     <tr>
                       <th>Date</th>
-                      <th>Humidité (%)</th>                        
+                      <th>Humidité (%)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -102,7 +130,7 @@
                     <tr>
                       <td>{{ row[0] }}</td>
                       <td>{{ '%0.2f'|format(row[2]) }}</td>
-                    </tr>          
+                    </tr>
                     {% endfor %}
                   </tbody>
                 </table>
@@ -110,145 +138,93 @@
             </div>
 
             <!-- Chart section -->
-            <!-- Google charts code start -->
             <div class="six columns" style="margin-top: 5%">
+              <!-- placeholder for temperature graph -->
               <div id="graph_temp"></div>
+              <!-- placeholder for humidity graph -->
               <div id="graph_humid"></div>
             </div>
-            <!-- Google charts code end -->
           </div>
         </div>
-      </div>           
+      </div>
     </div>
 
     <!-- jQuery -->
-    <script src="//code.jquery.com/jquery-3.7.1.slim.min.js"></script>
+    <script src="//code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Datetimepicker files -->
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.css"/>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.full.min.js"></script>
+
+    <!-- jstimezonedetect script -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.7/jstz.min.js"></script>
     <script>
-      jQuery("#range_select input[type=radio]").click(function(){
+      // submit range selection on radio button change
+      jQuery("#range_select input[type=radio]").click(function() {
         jQuery("#range_select").submit();
       });
+
+      // add timezone info when submitting datetime range
+      jQuery("#datetime_range").submit(function(event) {
+        timezone = jstz.determine();
+        jQuery(".timezone").val(timezone.name());
+      });
+
+      // initialize datetime pickers
+      jQuery('#datetimepicker1').datetimepicker({ format:'d-m-Y H:i:s' });
+      jQuery('#datetimepicker2').datetimepicker({ format:'d-m-Y H:i:s' });
+
+      // generate plotly graph on click
+      jQuery("#plotly").click(function() {
+        jQuery("#plotly_wait").text("Envoie les données...");
+        jQuery("#plotly_url").text("");
+        jQuery.get("/to_plotly", {from: "{{ start_date }}", to: "{{ end_date }}", timezone: "{{timezone}}"})
+            .done(function(data) {
+                jQuery("#plotly_url").attr("href", data);
+                jQuery("#plotly_url").text("Voir le graphique");
+                jQuery("#plotly_wait").text("");
+            });
+        return false;
+        });
     </script>
 
-    <!-- Datetimepicker files start -->
-  <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.css"/ >
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.full.min.js"></script>
-  
-     <!-- jstimezonedetect script start -->
-     <script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.7/jstz.min.js" ></script>
-     <script>
-     //This code is for the datetime range form
-     jQuery( "#datetime_range" ).submit(function( event ) {
-         timezone = jstz.determine();
-         jQuery(".timezone").val(timezone.name());
-     });
-     </script>
-     <!-- jstimezonedetect script end -->
-  
-  <script>
-    jQuery('#datetimepicker1').datetimepicker(
-      {
-        format:'d-m-Y H:i:s',
-      });
-    jQuery('#datetimepicker2').datetimepicker({
-        format:'d-m-Y H:i:s',
-      });
-
-      jQuery("#range_select input[type=radio]").click(function(){ 
-        timezone = jstz.determine();                // Datetimepicker code
-        jQuery(".timezone").val(timezone.name());   // Datetimepicker code
-        jQuery("#range_select").submit();
-      });
-  </script>
-  <!-- Datetimepicker files end -->
-
-    <!-- Google charts JS start -->
+    <!-- Google charts -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
     <script>
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(createTempChart);
       google.charts.setOnLoadCallback(createHumChart);
 
+      // function to create temperature chart
       function createTempChart() {
         var data = new google.visualization.DataTable();
         data.addColumn('datetime', 'Heure');
         data.addColumn('number', 'Température');
-
         data.addRows([
-            {% for row in temp %}
-                [
-                    new Date(
-                        {{ row[0][6:10] }},           // Year
-                        {{ row[0][3:5]|int - 1 }},    // Month (0-indexed)
-                        {{ row[0][0:2] }},            // Day
-                        {{ row[0][11:13] }},          // Hour
-                        {{ row[0][14:16] }}           // Minute
-                    ), 
-                    {{ row[2]|float }}
-                ],
-            {% endfor %}
+          {% for row in temp %}
+          [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
+          {% endfor %}
         ]);
-
-        var options = {
-            width: 600,
-            height: 300,
-            hAxis: {
-                title: "Date",
-                format: 'dd-MMM-yyyy HH:mm',
-                gridlines: { count: {{ temp_items }}, color: '#CCC' }
-            },
-            vAxis: {
-                title: 'Température (°C)'
-            },
-            title: 'Température',
-            curveType: 'function'
-        };
-
+        var options = { width: 600, height: 300, hAxis: { title: "Date", format: 'dd-MMM-yyyy HH:mm', gridlines: { count: {{ temp_items }}, color: '#CCC' } }, vAxis: { title: 'Température (°C)' }, title: 'Température', curveType: 'function' };
         var chart = new google.visualization.LineChart(document.getElementById('graph_temp'));
         chart.draw(data, options);
-    }
+      }
 
-    function createHumChart() {
+      // function to create humidity chart
+      function createHumChart() {
         var data = new google.visualization.DataTable();
         data.addColumn('datetime', 'Heure');
         data.addColumn('number', 'Humidité');
-
         data.addRows([
-            {% for row in hum %}
-                [
-                    new Date(
-                        {{ row[0][6:10] }},           // Year
-                        {{ row[0][3:5]|int - 1 }},    // Month (0-indexed)
-                        {{ row[0][0:2] }},            // Day
-                        {{ row[0][11:13] }},          // Hour
-                        {{ row[0][14:16] }}           // Minute
-                    ), 
-                    {{ row[2]|float }}
-                ],
-            {% endfor %}
+          {% for row in hum %}
+          [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
+          {% endfor %}
         ]);
-
-        var options = {
-            width: 600,
-            height: 300,
-            hAxis: {
-                title: "Date",
-                format: 'dd-MMM-yyyy HH:mm',
-                gridlines: { count: {{ hum_items }}, color: '#CCC' }
-            },
-            vAxis: {
-                title: 'Humidité (%)'
-            },
-            title: 'Humidité',
-            curveType: 'function'
-        };
-
+        var options = { width: 600, height: 300, hAxis: { title: "Date", format: 'dd-MMM-yyyy HH:mm', gridlines: { count: {{ hum_items }}, color: '#CCC' } }, vAxis: { title: 'Humidité (%)' }, title: 'Humidité', curveType: 'function' };
         var chart = new google.visualization.LineChart(document.getElementById('graph_humid'));
         chart.draw(data, options);
-    }
-
+      }
     </script>
-    <!-- Google charts JS end -->
   </body>
 </html>
 
