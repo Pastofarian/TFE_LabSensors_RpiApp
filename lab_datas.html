@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="refresh" content="10">
+    <meta name="description" content="Lab conditions monitored by Raspberry Pi">
+    <meta name="author" content="Christophe Aseglio">
+    <title>Conditions environnementales du laboratoire acoustique</title>
+    
+    <!-- Google Fonts: Raleway -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/assets/css/normalize.css">
+    <link rel="stylesheet" href="/assets/css/skeleton.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png">
+</head>
+<body>
+    <!-- Main content container -->
+    <div class="container">
+        <div class="row">
+            <div class="two-thirds column" style="margin-top: 5%">
+                <h2>Conditions climatiques en temps réel</h2>
+                <h1>Température: {{ "{0:0.1f}".format(temp) }}°C</h1>
+                <h1>Humidité: {{ "{0:0.1f}".format(hum) }}%</h1>
+                <p>Cette page se rafraîchit toutes les 10 secondes</p>
+                
+                <!-- Link to Historical Climate Conditions page -->
+                <div style="margin-top: 20px;">
+                    <a href="/lab_datas_db" style="position:relative; top:15px;">Historique des conditions climatiques</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>  
+</html>
+
