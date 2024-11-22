@@ -4,10 +4,23 @@ import datetime
 import sys
 import sqlite3
 import arrow
-import Adafruit_DHT
+#import Adafruit_DHT
+import smbus2
+import bme280
+import board
 import plotly.plotly as py
-from plotly.offline import plot
-from plotly.graph_objs import Scatter, Data, Layout, Figure, XAxis, YAxis
+from plotly.graph_objs import *
+from twilio.twiml.messaging_response import MessagingResponse
+#from plotly.offline import plot
+#from plotly.graph_objs import Scatter, Data, Layout, Figure, XAxis, YAxis
+import subprocess
+import os
+
+port = 1
+address = 0x76
+bus = smbus2.SMBus(port)
+
+calibration_params = bme280.load_calibration_params(bus, address)
 
 # create instance of the Flask app
 app = Flask(__name__)
@@ -22,7 +35,11 @@ def main_page():
 @app.route("/lab_datas")
 def lab_datas():
     # read temperature and humidity from DHT22 sensor
-    humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.AM2302, 17)
+    #humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.AM2302, 17)
+    data = bme280.sample(bus, address, calibration_params)
+    temperature = data.temperature
+    humidity = data.humidity
+    #pressure = data.pressure
 
     # if valid data is received from the sensor
     if humidity is not None and temperature is not None:
@@ -39,7 +56,7 @@ def lab_datas_db():
     except Exception as e:
         print(f"Error in lab_datas_db: {e}")
         abort(500)  # return 500 error if something goes wrong
-    
+
     timezone = request.args.get('timezone', 'Etc/UTC')
 
     # Adjust user timezone
@@ -151,7 +168,7 @@ def to_plotly_offline():
     temp = Scatter(x=time_series_adjusted_temperatures, y=time_series_temperature_values, name='Température')
     hum = Scatter(x=time_series_adjusted_humidities, y=time_series_humidity_values, name='Humidité', yaxis='y2')
 
-    data = [temp, hum]  # combine data 
+    data = [temp, hum]  # combine data
 
     # layout for the plot
     layout = Layout(
@@ -182,4 +199,3 @@ def check_date(d):
 # run the app
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)
-
