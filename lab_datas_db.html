@@ -6,7 +6,7 @@
     <meta name="description" content="Conditions climatiques surveillées par Raspberry Pi">
     <meta name="author" content="Christophe Aseglio">
 
-    <!-- Font and CSS links -->
+    <!-- font and CSS links -->
     <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
 
     <!-- CSS files -->
@@ -19,7 +19,7 @@
 
   <body>
     <div class="container">
-      <!-- Datetimepicker form start -->
+      <!-- datetimepicker form start -->
       <div class="row">
         <form id="datetime_range" action="/lab_datas_db" method="GET">
           <div class="three columns">
@@ -38,25 +38,25 @@
           </div>
         </form>
       </div>
-      <!-- Datetimepicker form end -->
+      <!-- datetimepicker form end -->
 
-      <!-- Link to current temp and hum start -->
+      <!-- link to current temp and hum start -->
       <div class="row">
         <div class="twelve columns" style="margin-bottom: 20px;">
           <!-- link to current live temperature and humidity -->
           <a href="/lab_datas" style="position:relative; top:15px">Conditions climatiques actuelles</a>
         </div>
       </div>
-      <!-- Link to current temp and hum end -->
+      <!-- link to current temp and hum end -->
 
-      <!-- Link to plotly start -->
+      <!-- link to plotly start -->
       <div class="row">
         <div class="twelve columns" style="margin-bottom: 20px;">
           <!-- link to generate plotly graph -->
           <a href="" id="plotly" style="position:relative; top:15px">Créer un graphique avec Plotly</a>
         </div>
       </div>
-      <!-- Link to plotly end -->
+      <!-- link to plotly end -->
 
       <div class="row">
         <div class="twelve columns">
@@ -65,7 +65,7 @@
             <p><strong>Affichage des enregistrements pour les dernières {{ range_time }} heures</strong></p>
           </header>
 
-          <!-- Form radio buttons -->
+          <!-- form radio buttons -->
           <form id="range_select" action="/lab_datas_db" method="GET">
             <!-- hidden input for timezone info -->
             <input type="hidden" class="timezone" name="timezone" />
@@ -92,9 +92,9 @@
           </div>
 
           <div class="row">
-            <!-- Tables section -->
+            <!-- tables section -->
             <div class="six columns" style="margin-top: 5%">
-              <!-- Temperature table -->
+              <!-- temperature table -->
               <section>
                 <h2>Températures</h2>
                 <table class="u-full-width">
@@ -108,14 +108,14 @@
                     {% for row in temp %}
                     <tr>
                       <td>{{ row[0] }}</td>
-                      <td>{{ '%0.2f'|format(row[2]) }}</td>
+                      <td>{{ '%0.1f'|format(row[2]) }}</td>
                     </tr>
                     {% endfor %}
                   </tbody>
                 </table>
               </section>
 
-              <!-- Humidity table -->
+              <!-- humidity table -->
               <section>
                 <h2>Humidités</h2>
                 <table class="u-full-width">
@@ -129,6 +129,27 @@
                     {% for row in hum %}
                     <tr>
                       <td>{{ row[0] }}</td>
+                      <td>{{ '%0.1f'|format(row[2]) }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </section>
+
+              <!-- pressure table -->
+              <section>
+                <h2>Pressions</h2>
+                <table class="u-full-width">
+                  <thead>
+                    <tr>
+                      <th>date</th>
+                      <th>Pression (pa)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for row in press %}
+                    <tr>
+                      <td>{{ row[0] }}</td>
                       <td>{{ '%0.2f'|format(row[2]) }}</td>
                     </tr>
                     {% endfor %}
@@ -137,12 +158,13 @@
               </section>
             </div>
 
-            <!-- Chart section -->
+            <!-- chart section -->
             <div class="six columns" style="margin-top: 5%">
               <!-- placeholder for temperature graph -->
               <div id="graph_temp"></div>
               <!-- placeholder for humidity graph -->
               <div id="graph_humid"></div>
+              <div id="graph_press"></div>
             </div>
           </div>
         </div>
@@ -161,18 +183,24 @@
     <script>
       // submit range selection on radio button change
       jQuery("#range_select input[type=radio]").click(function() {
-        jQuery("#range_select").submit();
+      const range = jQuery(this).val();
+      const now = new Date();
+      const fromDate = new Date(now.getTime() - range * 3600 * 1000);
+      const toDateStr = now.toISOString().slice(0, 19).replace("T", " ");
+      const fromDateStr = fromDate.toISOString().slice(0, 19).replace("T", " ");
+
+      jQuery("#datetimepicker1").val(fromDateStr);
+      jQuery("#datetimepicker2").val(toDateStr);
+
+      // submit the form automatically
+      jQuery("#range_select").submit();
       });
 
-      // add timezone info when submitting datetime range
-      jQuery("#datetime_range").submit(function(event) {
-        timezone = jstz.determine();
-        jQuery(".timezone").val(timezone.name());
+     // radio buttons get initialized with current datas
+      jQuery(document).ready(function() {
+      const currentRange = "{{ range_time }}";
+      jQuery(`#range_select input[value='${currentRange}']`).prop("checked", true);
       });
-
-      // initialize datetime pickers
-      jQuery('#datetimepicker1').datetimepicker({ format:'d-m-Y H:i:s' });
-      jQuery('#datetimepicker2').datetimepicker({ format:'d-m-Y H:i:s' });
 
       // generate plotly graph on click
       jQuery("#plotly").click(function() {
@@ -185,7 +213,7 @@
                 jQuery("#plotly_wait").text("");
             });
         return false;
-        });
+      });
     </script>
 
     <!-- Google charts -->
@@ -194,6 +222,7 @@
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(createTempChart);
       google.charts.setOnLoadCallback(createHumChart);
+      google.charts.setOnLoadCallback(createPressChart);
 
       // function to create temperature chart
       function createTempChart() {
@@ -224,7 +253,21 @@
         var chart = new google.visualization.LineChart(document.getElementById('graph_humid'));
         chart.draw(data, options);
       }
+
+      // function to create pressure chart
+      function createPressChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('datetime', 'Heure');
+        data.addColumn('number', 'Pression');
+        data.addRows([
+          {% for row in press %}
+          [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
+          {% endfor %}
+        ]);
+        var options = { width: 600, height: 300, hAxis: { title: "Date", format: 'dd-MMM-yyyy HH:mm', gridlines: { count: {{ press_items }}, color: '#CCC' } }, vAxis: { title: 'Pression (Pa)' }, title: 'Pression', curveType: 'function' };
+        var chart = new google.visualization.LineChart(document.getElementById('graph_press'));
+        chart.draw(data, options);
+      }
     </script>
   </body>
 </html>
-
