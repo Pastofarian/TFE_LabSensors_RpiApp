@@ -12,175 +12,272 @@
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
 
     <style>
-      .node-button {
-        background-color: green;
-        color: white;
-        padding: 5px 10px;
-        margin-right: 5px;
-        text-decoration: none;
+      body {
+        font-family: 'Raleway', sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* prevents the entire page from scrolling */
       }
+
+      .top-header {
+        position: absolute;
+        top:0;
+        left:0;
+        width:100%;
+        background:#fff;
+        z-index:999;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        box-sizing:border-box;
+        padding:20px;
+        border-bottom:1px solid #ddd;
+      }
+      .top-header h1 {
+        margin:0;
+        font-size: 3em;
+      }
+
+      .layout-container {
+        margin-top:80px; 
+        height:calc(100vh - 80px);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding: 20px;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      @media screen and (max-width: 768px) {
+        .layout-container {
+          grid-template-columns: 1fr;
+          height: auto;
+          overflow: visible;
+        }
+
+        .right-column {
+          max-height: auto;
+          overflow-y: visible;
+        }
+      }
+
+      .left-column, .middle-column, .right-column {
+        background-color: #fff;
+        padding: 20px;
+        border: 1px solid #ddd;
+      }
+
+      .right-column {
+        overflow-y: auto;
+        max-height: calc(100vh - 40px);
+        box-sizing: border-box;
+      }
+
+      h2, h1 {
+        margin-top: 0;
+      }
+
+      .button-primary {
+        background-color: #0078d7;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+      }
+
+      .node-button, .node-button-selected {
+        display: inline-block;
+        padding: 6px 10px;
+        margin-right: 5px;
+        color: white;
+        text-decoration: none;
+        background-color: green;
+        border-radius: 4px;
+      }
+
       .node-button-selected {
         background-color: #0a5;
-        color: #fff;
-        padding: 5px 10px;
-        margin-right: 5px;
-        text-decoration: none;
         font-weight: bold;
       }
+
+      .time-range-form label {
+        display: inline;
+        margin-right: 10px;
+      }
+
+      .time-range-form input[type="radio"] {
+        margin-right: 3px;
+      }
+
+      table.u-full-width {
+        margin-top: 20px;
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      table.u-full-width th, table.u-full-width td {
+        border-bottom: 1px solid #ddd;
+        padding: 5px;
+        text-align: left;
+      }
+
+      #graph_temp, #graph_humid, #graph_press {
+        margin-bottom: 20px;
+      }
+
+      /* button for the interval */
+      .interval-btn {
+        background-color: green;
+        color: white;
+        /*padding: 10px 20px;*/
+        cursor: pointer;
+        border:none;
+        border-radius:4px;
+        font-size:16px;
+        margin-left:10px;
+        position: relative;
+      }
+
+      .interval-dropdown {
+        position: absolute;
+        top: 60px; 
+        right: 20px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius:4px;
+        box-shadow:0 2px 5px rgba(0,0,0,0.2);
+        display:none;
+      }
+
+      .interval-dropdown div {
+        padding:10px;
+        cursor:pointer;
+      }
+
+      .interval-dropdown div:hover {
+        background:#eee;
+      }
+
+      .header-controls {
+        display:flex;
+        align-items:center;
+      }
+
+      .my-btn {
+        background-color: #0078d7;
+        color: white;
+        border: none;
+        margin-left: 10px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 14px;
+        /*padding:10px 20px;*/
+      }
+
+      .my-btn:hover {
+        background-color: #005fa3;
+      }
+
+      .my-btn.clicked {
+        background-color: #00a300;
+      }
+
     </style>
-
   </head>
+
   <body>
-    <div class="container">
-
-      <!-- cell Title -->
-      <div class="row">
+    <div class="top-header">
+        <h1>Dashboard laboratoire acoustique</h1>
+        <div class="header-controls">
+          <button class="my-btn" id="btn-live">Live</button>
+          <button class="my-btn" id="btn-plotly">Plotly</button>
+          <!-- interval button -->
+          <button class="interval-btn" id="interval-btn">Intervalle {{ selected_interval }}</button>
+          <div class="interval-dropdown" id="interval-dropdown">
+            <div data-value="1min">1min</div>
+            <div data-value="3min">3min</div>
+            <div data-value="5min">5min</div>
+            <div data-value="10min">10min</div>
+            <div data-value="30min">30min</div>
+            <div data-value="60min">60min</div>
+          </div>
+        </div>
+    </div>
+    <div class="layout-container">
+      <div class="left-column">
         <h2>Cellule {{ node }}</h2>
-      </div>
 
-      <!-- node selection -->
-      <div class="row" style="margin-bottom:20px;">
-        {% for n in range(1,7) %}
-          {% if node == n|string %}
-            <span class="node-button-selected">Cellule {{ n }}</span>
-          {% else %}
-            <a class="node-button" href="/lab_datas_db?from={{ start_date }}&to={{ end_date }}&range_time={{ range_time }}&timezone={{ timezone }}&node={{ n }}">Cellule {{ n }}</a>
-          {% endif %}
-        {% endfor %}
-      </div>
+        <div style="margin-bottom:20px;">
+          {% for n in range(1,7) %}
+            {% if node == n|string %}
+              <span class="node-button-selected">Cellule {{ n }}</span>
+            {% else %}
+              <a class="node-button" href="/lab_datas_db?from={{ start_date }}&to={{ end_date }}&range_time={{ range_time }}&timezone={{ timezone }}&node={{ n }}">Cellule {{ n }}</a>
+            {% endif %}
+          {% endfor %}
+        </div>
 
-      <div class="row">
         <form id="datetime_range" action="/lab_datas_db" method="GET">
-          <div class="three columns">
-            <label for="from">Depuis le</label>
-            <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from">
-          </div>
-          <div class="three columns">
-            <label for="to">À</label>
-            <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to">
-          </div>
-          <div class="two columns">
-            <input class="button-primary" type="submit" value="Valider" style="position:relative; top: 28px" id="submit_button" />
-          </div>
-          <!-- keep node, timezone and range_time when validating -->
+          <label for="from">Depuis le</label>
+          <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from">
+
+          <label for="to">À</label>
+          <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to">
+
           <input type="hidden" class="timezone" name="timezone" value="{{ timezone }}">
           <input type="hidden" name="node" value="{{ node }}">
           <input type="hidden" name="range_time" value="{{ range_time }}">
+
+          <input class="button-primary" type="submit" value="Valider" style="margin-top:10px;">
         </form>
-      </div>
 
-      <div class="row">
-        <div class="twelve columns" style="margin-bottom: 20px;">
-          <a href="/lab_datas?node={{ node }}" style="position:relative; top:15px">Conditions climatiques actuelles</a>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="twelve columns" style="margin-bottom: 20px;">
-          <a href="#" id="plotly" style="position:relative; top:15px">Créer un graphique avec Plotly</a>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="twelve columns">
-          <header>
-            <h1>Conditions climatiques</h1>
-            <p><strong>Affichage des enregistrements pour les dernières {{ range_time }} heures</strong></p>
-          </header>
-
+        <div class="time-range-form" style="margin-top:20px;">
           <form id="range_select" action="/lab_datas_db" method="GET">
             <input type="hidden" class="timezone" name="timezone" value="{{ timezone }}"/>
             <input type="hidden" name="node" value="{{ node }}">
-            <div class="row">
-              <div class="one column">
-                <input type="radio" name="range_time" value="3" id="radio_3" {% if range_time == '3' %}checked{% endif %}/><label for="radio_3">3h</label>
-              </div>
-              <div class="one column">
-                <input type="radio" name="range_time" value="6" id="radio_6" {% if range_time == '6' %}checked{% endif %}/><label for="radio_6">6h</label>
-              </div>
-              <div class="one column">
-                <input type="radio" name="range_time" value="12" id="radio_12" {% if range_time == '12' %}checked{% endif %}/><label for="radio_12">12h</label>
-              </div>
-              <div class="one column">
-                <input type="radio" name="range_time" value="24" id="radio_24" {% if range_time == '24' %}checked{% endif %}/><label for="radio_24">24h</label>
-              </div>
-            </div>
+
+            <input type="radio" name="range_time" value="3" id="radio_3" {% if range_time == '3' %}checked{% endif %}/> <label for="radio_3">3h</label>
+            <input type="radio" name="range_time" value="6" id="radio_6" {% if range_time == '6' %}checked{% endif %}/> <label for="radio_6">6h</label>
+            <input type="radio" name="range_time" value="12" id="radio_12" {% if range_time == '12' %}checked{% endif %}/> <label for="radio_12">12h</label>
+            <input type="radio" name="range_time" value="24" id="radio_24" {% if range_time == '24' %}checked{% endif %}/> <label for="radio_24">24h</label>
           </form>
-
-          <div class="row">
-            <a href="" id="plotly_url" target="_blank"></a><span id="plotly_wait"></span>
-          </div>
-
-          <div class="row">
-            <div class="six columns" style="margin-top: 5%">
-              <section>
-                <h2>Températures</h2>
-                <table class="u-full-width">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Température (&deg;C)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for row in temp %}
-                    <tr>
-                      <td>{{ row[0] }}</td>
-                      <td>{{ '%0.1f'|format(row[2]) }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </section>
-
-              <section>
-                <h2>Humidités</h2>
-                <table class="u-full-width">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Humidité (%)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for row in hum %}
-                    <tr>
-                      <td>{{ row[0] }}</td>
-                      <td>{{ '%0.1f'|format(row[2]) }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </section>
-
-              <section>
-                <h2>Pressions</h2>
-                <table class="u-full-width">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Pression (pa)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for row in press %}
-                    <tr>
-                      <td>{{ row[0] }}</td>
-                      <td>{{ '%0.2f'|format(row[2]) }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </section>
-            </div>
-
-            <div class="six columns" style="margin-top: 5%">
-              <div id="graph_temp"></div>
-              <div id="graph_humid"></div>
-              <div id="graph_press"></div>
-            </div>
-          </div>
         </div>
+      </div>
+
+      <div class="middle-column">
+        <h2>Graphiques</h2>
+        <div id="graph_temp"></div>
+        <div id="graph_humid"></div>
+        <div id="graph_press"></div>
+      </div>
+
+      <div class="right-column">
+        <h2>Données historiques</h2>
+        <h3>Températures, humidité, pression</h3>
+        <p>Liste de {{ combined_data|length }} éléments</p>
+        <table class="u-full-width">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>°C</th>
+              <th>%</th>
+              <th>hPa</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in combined_data %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ row.date }}</td>
+              <td>{{ row.temp }}</td>
+              <td>{{ row.humidity }}</td>
+              <td>{{ row.pressure }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -194,7 +291,7 @@
         jQuery('#datetimepicker1').datetimepicker({ format:'Y-m-d H:i:s' });
         jQuery('#datetimepicker2').datetimepicker({ format:'Y-m-d H:i:s' });
 
-        // when we change the range time with the radios
+        // when changing the time range with radios
         jQuery("#range_select input[type=radio]").click(function() {
           const range = jQuery(this).val();
           const now = new Date();
@@ -209,32 +306,14 @@
           jQuery("#range_select").submit();
         });
 
-        // initialize radio value based on current range_time
+        // initialize radio based on current range_time
         const currentRange = "{{ range_time }}";
-        jQuery(`#range_select input[value='${currentRange}']`).prop("checked", true);
+        jQuery("#range_select input[value='" + currentRange + "']").prop("checked", true);
 
-        // on submitting the datetime_range form, the timezone is calculated dynamically
+        // on submitting the datetime_range form, the timezone is determined dynamically
         jQuery("#datetime_range").submit(function(event) {
-          timezone = jstz.determine();
+          const timezone = jstz.determine();
           jQuery(".timezone").val(timezone.name());
-        });
-
-        // plotly graph generation on click
-        jQuery("#plotly").click(function() {
-          jQuery("#plotly_wait").text("Envoie les données...");
-          jQuery("#plotly_url").text("");
-          jQuery.get("/to_plotly", {
-              from: "{{ start_date }}",
-              to: "{{ end_date }}",
-              timezone: "{{timezone}}",
-              node: "{{ node }}"
-            })
-            .done(function(data) {
-              jQuery("#plotly_url").attr("href", data);
-              jQuery("#plotly_url").text("Voir le graphique");
-              jQuery("#plotly_wait").text("");
-            });
-          return false;
         });
       });
     </script>
@@ -255,7 +334,7 @@
           [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
           {% endfor %}
         ]);
-        var options = { width: 600, height: 300, hAxis: { title: "Date", format: 'dd-MMM-yyyy HH:mm', gridlines: { count: {{ temp_items }}, color: '#CCC' } }, vAxis: { title: 'Température (°C)' }, title: 'Température', curveType: 'function' };
+        var options = { width: '100%', height: 300, hAxis: { title: "Date", format: 'dd-MMM-yyyy HH:mm', gridlines: { count: {{ temp_items }}, color: '#CCC' } }, vAxis: { title: 'Température (°C)' }, title: 'Température', curveType: 'function' };
         var chart = new google.visualization.LineChart(document.getElementById('graph_temp'));
         chart.draw(data, options);
       }
@@ -269,7 +348,7 @@
           [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
           {% endfor %}
         ]);
-        var options = { width: 600, height: 300, hAxis: { title: "Date", format: 'dd-MMM-yyyy HH:mm', gridlines: { count: {{ hum_items }}, color: '#CCC' } }, vAxis: { title: 'Humidité (%)' }, title: 'Humidité', curveType: 'function' };
+        var options = { width: '100%', height: 300, hAxis: { title: "Date", format: 'dd-MMM-yyyy HH:mm', gridlines: { count: {{ hum_items }}, color: '#CCC' } }, vAxis: { title: 'Humidité (%)' }, title: 'Humidité', curveType: 'function' };
         var chart = new google.visualization.LineChart(document.getElementById('graph_humid'));
         chart.draw(data, options);
       }
@@ -283,10 +362,84 @@
           [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
           {% endfor %}
         ]);
-        var options = { width: 600, height: 300, hAxis: { title: "Date", format: 'dd-MMM-yyyy HH:mm', gridlines: { count: {{ press_items }}, color: '#CCC' } }, vAxis: { title: 'Pression (Pa)' }, title: 'Pression', curveType: 'function' };
+        var options = { width: '100%', height: 300, hAxis: { title: "Date", format: 'dd-MMM-yyyy HH:mm', gridlines: { count: {{ press_items }}, color: '#CCC' } }, vAxis: { title: 'Pression (Pa)' }, title: 'Pression', curveType: 'function' };
         var chart = new google.visualization.LineChart(document.getElementById('graph_press'));
         chart.draw(data, options);
       }
     </script>
+    <script>
+        var plotlyLink = null; // global variable to store the link once obtained
+
+        // live button
+        document.getElementById('btn-live').addEventListener('click', function() {
+          window.location.href = "/lab_datas?node={{ node }}";
+        });
+
+        // plotly button
+        document.getElementById('btn-plotly').addEventListener('click', function() {
+          var btnPlotly = this;
+
+          // if I already have a plotly link, just open it
+          if (plotlyLink) {
+            window.open(plotlyLink, "_blank");
+            return;
+          }
+
+          // otherwise, I generate it
+          btnPlotly.classList.add('clicked');
+          btnPlotly.textContent = "...envoie";
+
+          jQuery.get("/to_plotly", {
+            from: "{{ start_date }}",
+            to: "{{ end_date }}",
+            timezone: "{{timezone}}",
+            node: "{{ node }}"
+          })
+          .done(function(data) {
+            plotlyLink = data;
+            btnPlotly.textContent = "Afficher";
+            btnPlotly.classList.remove('clicked');
+          })
+          .fail(function() {
+            btnPlotly.textContent = "Erreur";
+            btnPlotly.classList.remove('clicked');
+          });
+        });
+
+        // handle interval dropdown menu
+        var intervalBtn = document.getElementById('interval-btn');
+        var intervalDropdown = document.getElementById('interval-dropdown');
+
+        intervalBtn.addEventListener('click', function() {
+          if(intervalDropdown.style.display === 'none' || intervalDropdown.style.display === '') {
+            intervalDropdown.style.display = 'block';
+          } else {
+            intervalDropdown.style.display = 'none';
+          }
+        });
+
+        // when choosing an interval
+        var options = intervalDropdown.querySelectorAll('div[data-value]');
+        options.forEach(function(opt) {
+          opt.addEventListener('click', function() {
+            var val = this.getAttribute('data-value');
+            // update the button text
+            intervalBtn.textContent = "Intervale " + val;
+
+            // hide the menu
+            intervalDropdown.style.display = 'none';
+
+            // send ajax request to update cron
+            jQuery.post("/update_cron", { interval: val })
+            .done(function(response) {
+                console.log("Cron updated with interval:", response.selected_interval);
+            })
+            .fail(function() {
+                console.log("error updating cron");
+            });
+          });
+        });
+    </script>
   </body>
 </html>
+
