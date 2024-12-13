@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.debug = True
 
 # default interval
-selected_interval = "1min"
+selected_interval = "30min"
 
 @app.route("/")
 def main_page():
