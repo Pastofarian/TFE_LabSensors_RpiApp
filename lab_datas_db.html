@@ -13,271 +13,420 @@
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
 
     <style>
-      body {
-        font-family: 'Raleway', sans-serif;
-        margin: 0;
-        padding: 0;
-        overflow: hidden; /* prevents the entire page from scrolling */
-      }
+        /* handle global body layout */
+        body {
+          font-family: 'Raleway', sans-serif;
+          margin: 0;
+          padding: 0;
+          overflow: hidden; /* prevents entire page scrolling */
+        }
 
-      .dashboard-title {
-        font-size: 3.5em;
-        font-weight: 700;
-        background: linear-gradient(90deg, #0078d7, #00c6ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-transform: uppercase;
-        margin: 0;
-        letter-spacing: 2px;
-      }
+        /* style dashboard title */
+        .dashboard-title {
+          font-size: 3.5em;
+          font-weight: 700;
+          background: linear-gradient(90deg, #0078d7, #00c6ff);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-transform: uppercase;
+          margin: 0;
+          letter-spacing: 2px;
+        }
 
-      .title-icon {
-        font-size: 0.8em;
-        margin-right: 10px;
-      }
+        .title-icon {
+          font-size: 0.8em;
+          margin-right: 10px;
+        }
 
-      .top-header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background: #f8f8f8;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-sizing: border-box;
-        padding: 20px;
-        border-bottom: 1px solid #ddd;
-      }
+        /* style top header */
+        .top-header {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          background: #f8f8f8;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          box-sizing: border-box;
+          padding: 20px;
+          border-bottom: 1px solid #ddd;
+        }
 
-      .layout-container {
-        margin-top: 80px;
-        height: calc(100vh - 80px);
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        padding: 20px;
-        overflow: hidden;
-        box-sizing: border-box;
-      }
-
-      @media screen and (max-width: 768px) {
+        /* handle main layout */
         .layout-container {
-          grid-template-columns: 1fr;
-          height: auto;
-          overflow: visible;
+          margin-top: 80px;
+          height: calc(100vh - 80px);
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+          padding: 20px;
+          overflow: hidden;
+          box-sizing: border-box;
+        }
+
+        @media screen and (max-width: 768px) {
+          .layout-container {
+            grid-template-columns: 1fr;
+            height: auto;
+            overflow: visible;
+          }
+
+          .right-column {
+            max-height: auto;
+            overflow-y: visible;
+          }
+        }
+
+        /* columns styling */
+        .left-column, .middle-column, .right-column {
+          background-color: #fff;
+          padding: 20px;
+          border: 1px solid #ddd;
         }
 
         .right-column {
-          max-height: auto;
-          overflow-y: visible;
+          overflow-y: auto;
+          max-height: calc(100vh - 40px);
+          box-sizing: border-box;
         }
-      }
 
-      .left-column, .middle-column, .right-column {
-        background-color: #fff;
-        padding: 20px;
-        border: 1px solid #ddd;
-      }
+        h2, h1 {
+          margin-top: 0;
+        }
 
-      .right-column {
-        overflow-y: auto;
-        max-height: calc(100vh - 40px);
-        box-sizing: border-box;
-      }
+        .button-primary {
+          background-color: #0078d7;
+          color: white;
+          border: none;
+          padding: 10px 15px;
+          cursor: pointer;
+        }
 
-      h2, h1 {
-        margin-top: 0;
-      }
+        /* node buttons */
+        .node-button, .node-button-selected {
+          display: inline-block;
+          padding: 6px 10px;
+          margin-right: 5px;
+          color: white;
+          text-decoration: none;
+          background-color: green;
+          border-radius: 4px;
+        }
 
-      .button-primary {
-        background-color: #0078d7;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        cursor: pointer;
-      }
+        .node-button-selected {
+          background-color: #0a5;
+          font-weight: bold;
+        }
 
-      .node-button, .node-button-selected {
-        display: inline-block;
-        padding: 6px 10px;
-        margin-right: 5px;
-        color: white;
-        text-decoration: none;
-        background-color: green;
-        border-radius: 4px;
-      }
+        .time-range-form label {
+          display: inline;
+          margin-right: 10px;
+        }
 
-      .node-button-selected {
-        background-color: #0a5;
-        font-weight: bold;
-      }
+        .time-range-form input[type="radio"] {
+          margin-right: 3px;
+        }
 
-      .time-range-form label {
-        display: inline;
-        margin-right: 10px;
-      }
+        table.u-full-width {
+          margin-top: 20px;
+          border-collapse: collapse;
+          width: 100%;
+        }
 
-      .time-range-form input[type="radio"] {
-        margin-right: 3px;
-      }
+        table.u-full-width th, table.u-full-width td {
+          border-bottom: 1px solid #ddd;
+          padding: 5px;
+          text-align: left;
+        }
 
-      table.u-full-width {
-        margin-top: 20px;
-        border-collapse: collapse;
-        width: 100%;
-      }
+        /* graphs area */
+        #graph_temp, #graph_humid, #graph_press {
+          margin-bottom: 20px;
+        }
 
-      table.u-full-width th, table.u-full-width td {
-        border-bottom: 1px solid #ddd;
-        padding: 5px;
-        text-align: left;
-      }
+        /* interval button and dropdown */
+        .interval-btn {
+          background-color: green;
+          color: white;
+          cursor: pointer;
+          border: none;
+          border-radius: 4px;
+          font-size: 16px;
+          margin-left: 10px;
+          position: relative;
+        }
 
-      #graph_temp, #graph_humid, #graph_press {
-        margin-bottom: 20px;
-      }
+        /* handle interval dropdown menu */
+        .interval-dropdown {
+          position: absolute;
+          top: 60px;
+          right: 20px;
+          background: #fff;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+          display: none;
+        }
 
-      .interval-btn {
-        background-color: green;
-        color: white;
-        cursor: pointer;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        margin-left: 10px;
-        position: relative;
-      }
+        .interval-dropdown div {
+          padding: 10px;
+          cursor: pointer;
+        }
 
-      .interval-dropdown {
-        position: absolute;
-        top: 60px;
-        right: 20px;
-        background: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        display: none;
-      }
+        .interval-dropdown div:hover {
+          background: #eee;
+        }
 
-      .interval-dropdown div {
-        padding: 10px;
-        cursor: pointer;
-      }
+        .header-controls {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
 
-      .interval-dropdown div:hover {
-        background: #eee;
-      }
+        .my-btn, .interval-btn {
+          background-color: #0078d7;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
 
-      .header-controls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
+        .my-btn:hover, .interval-btn:hover {
+          background-color: #005fa3;
+        }
 
-      .my-btn, .interval-btn {
-        background-color: #0078d7;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 14px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
+        .my-btn.clicked {
+          background-color: #00a300;
+        }
 
-      .my-btn:hover, .interval-btn:hover {
-        background-color: #005fa3;
-      }
+        table.u-full-width, table.u-full-width th, table.u-full-width td {
+          background-color: #fff;
+          color: #000;
+        }
 
-      .my-btn.clicked {
-        background-color: #00a300;
-      }
+        /* handle dark mode colors */
+        body.dark-mode table.u-full-width,
+        body.dark-mode table.u-full-width th,
+        body.dark-mode table.u-full-width td {
+          background-color: #1e1e1e;
+          color: #fff;
+        }
 
-      table.u-full-width, table.u-full-width th, table.u-full-width td {
-        background-color: #fff;
-        color: #000;
-      }
+        body.dark-mode {
+          background: #121212;
+          color: #fff;
+        }
 
-      body.dark-mode table.u-full-width,
-      body.dark-mode table.u-full-width th,
-      body.dark-mode table.u-full-width td {
-        background-color: #1e1e1e;
-        color: #fff;
-      }
+        body.dark-mode .top-header {
+          background: #1e1e1e;
+          border-bottom: 1px solid #333;
+        }
 
-      body.dark-mode {
-        background: #121212;
-        color: #fff;
-      }
+        body.dark-mode .left-column,
+        body.dark-mode .middle-column,
+        body.dark-mode .right-column {
+          background: #1e1e1e;
+          border-color: #333;
+        }
 
-      body.dark-mode .top-header {
-        background: #1e1e1e;
-        border-bottom: 1px solid #333;
-      }
+        body.dark-mode table.u-full-width th,
+        body.dark-mode table.u-full-width td {
+          border-color: #555;
+        }
 
-      body.dark-mode .left-column,
-      body.dark-mode .middle-column,
-      body.dark-mode .right-column {
-        background: #1e1e1e;
-        border-color: #333;
-      }
+        body.dark-mode .node-button, body.dark-mode .node-button-selected {
+          background: green;
+          color: white;
+        }
 
-      body.dark-mode table.u-full-width th,
-      body.dark-mode table.u-full-width td {
-        border-color: #555;
-      }
+        body.dark-mode .header-controls .my-btn,
+        body.dark-mode .header-controls .interval-btn {
+          background-color: #444;
+          color: #fff;
+        }
 
-      body.dark-mode .node-button, body.dark-mode .node-button-selected {
-        background: green;
-        color: white;
-      }
+        body.dark-mode .interval-dropdown {
+          background: #1e1e1e;
+          border-color: #333;
+        }
 
-      body.dark-mode .header-controls .my-btn,
-      body.dark-mode .header-controls .interval-btn {
-        background-color: #444;
-        color: #fff;
-      }
+        body.dark-mode .interval-dropdown div:hover {
+          background: #333;
+        }
 
-      body.dark-mode .interval-dropdown {
-        background: #1e1e1e;
-        border-color: #333;
-      }
+        /* style digital clock and date display */
+        #digital-clock {
+          margin-bottom: 30px;
+          text-align: left;
+          padding: 10px 0;
+          display: inline-block;
+          width: 70%;
+        }
 
-      body.dark-mode .interval-dropdown div:hover {
-        background: #333;
-      }
+        /* handle font color for clock */
+        .font-color {
+          background: green; 
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          -webkit-background-clip: text;
+        }
+
+        /* dark mode font color gradient */
+        body.dark-mode .font-color {
+          background: linear-gradient(to bottom, white, green);
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          -webkit-background-clip: text;
+        }
+
+        .timeDiv {
+          margin-bottom: 10px;
+        }
+
+        #time {
+          font-size: 6rem !important;
+          font-weight: bold;
+        }
+
+        #med {
+          position: absolute;
+          top: 20px;
+          right: 0;
+          font-size: 1.5rem;
+        }
+
+        .dayDiv span {
+          font-size: 2rem !important;
+          opacity: 0.8;
+        }
+
+        #full-date {
+          font-size: 3rem !important;
+        }
+
+        /* style chrono-timer display and buttons */
+        #chrono-timer {
+          margin-bottom: 20px;
+          text-align: center;
+        }
+
+        #chrono-timer-display {
+          font-size: 6rem !important;
+          font-weight: bold;
+        }
+
+        .switch-button {
+          font-size: 1.5rem;
+          border: none;
+          padding: 5px 15px;
+          border-radius: 4px;
+          cursor: pointer;
+          color: white;
+          background: green; 
+        }
+
+        body.dark-mode .switch-button {
+          background: linear-gradient(to bottom, white, green); 
+        }
+
+        #start-button {
+          font-size: 1.5rem;
+          border: none;
+          padding: 5px 15px;
+          border-radius: 4px;
+          cursor: pointer;
+          color: white;
+          background: green; 
+        }
+
+        body.dark-mode #start-button {
+          background: linear-gradient(to bottom, white, green); 
+        }
+
+        #timer-input {
+          display: none;
+        }
+
+        #gauges-container {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 0;
+        }
+
+        #gauges-container canvas {
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
     </style>
-    </head>
-    <body>
-      <div class="top-header">
-          <h1 class="dashboard-title">
-            <span class="title-icon">📊</span> Dashboard laboratoire acoustique
-          </h1>
-          <div class="header-controls">
-            <!-- Live datas button -->
-            <button class="my-btn" id="btn-live">Live</button>
-            <!-- Plotly button -->
-            <button class="my-btn" id="btn-plotly">Plotly</button>
-            <!-- dark theme button -->
-            <button class="my-btn" id="btn-mode">Dark/Light</button>
-            <!-- interval button -->
-            <button class="interval-btn" id="interval-btn">Intervalle {{ selected_interval }}</button>
-            <div class="interval-dropdown" id="interval-dropdown">
-              <div data-value="1min">1min</div>
-              <div data-value="3min">3min</div>
-              <div data-value="5min">5min</div>
-              <div data-value="10min">10min</div>
-              <div data-value="30min">30min</div>
-              <div data-value="60min">60min</div>
-            </div>
+  </head>
+  <body>
+    <!-- render top header with controls -->
+    <div class="top-header">
+        <h1 class="dashboard-title">
+          <span class="title-icon">📊</span> Dashboard laboratoire acoustique
+        </h1>
+        <div class="header-controls">
+          <!-- live datas button -->
+          <button class="my-btn" id="btn-live">Live</button>
+          <!-- plotly button -->
+          <button class="my-btn" id="btn-plotly">Plotly</button>
+          <!-- dark theme button -->
+          <button class="my-btn" id="btn-mode">Dark/Light</button>
+          <!-- interval button -->
+          <button class="interval-btn" id="interval-btn">Intervalle {{ selected_interval }}</button>
+          <div class="interval-dropdown" id="interval-dropdown">
+            <div data-value="1min">1min</div>
+            <div data-value="3min">3min</div>
+            <div data-value="5min">5min</div>
+            <div data-value="10min">10min</div>
+            <div data-value="30min">30min</div>
+            <div data-value="60min">60min</div>
           </div>
         </div>
-      <div class="layout-container">
-        <div class="left-column">
+    </div>
+    <div class="layout-container">
+      <div class="left-column">
+
+          <!-- render digital clock and chrono/timer in a flex container -->
+          <div style="display: flex; width: 100%; justify-content: space-between; align-items: center; margin-bottom:20px;">
+            <div id="digital-clock" class="content" style="flex:1; text-align:center;">
+              <div class="timeDiv">
+                <span class="font-color" id="time"></span>
+                <span class="font-color" id="sec"></span>
+                <span class="font-color" id="med"></span>
+              </div>
+              <div class="dayDiv">
+                <span class="font-color day">DIM</span>
+                <span class="font-color day">LUN</span>
+                <span class="font-color day">MAR</span>
+                <span class="font-color day">MER</span>
+                <span class="font-color day">JEU</span>
+                <span class="font-color day">VEN</span>
+                <span class="font-color day">SAM</span>
+              </div>
+              <span class="font-color" id="full-date"></span>
+            </div>
+
+            <div id="chrono-timer" class="content" style="flex:1; text-align:center;">
+              <div class="timeDiv">
+                <span class="font-color" id="chrono-timer-display" contenteditable="false">00:00:00</span>
+              </div>
+              <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+                <button id="switch-mode" class="switch-button">Minuteur</button>
+                <button id="start-button">Start</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- display cellule links and forms -->
           <h2>Cellule {{ node }}</h2>
-  
           <div style="margin-bottom:20px;">
             {% for n in range(1,7) %}
               {% if node == n|string %}
@@ -287,159 +436,163 @@
               {% endif %}
             {% endfor %}
           </div>
-  
+
           <form id="datetime_range" action="/lab_datas_db" method="GET">
             <label for="from">Depuis le</label>
             <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from">
-  
+
             <label for="to">À</label>
             <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to">
-  
+
             <input type="hidden" class="timezone" name="timezone" value="{{ timezone }}">
             <input type="hidden" name="node" value="{{ node }}">
             <input type="hidden" name="range_time" value="{{ range_time }}">
-  
+
             <input class="button-primary" type="submit" value="Valider" style="margin-top:10px;">
           </form>
-  
+
           <div class="time-range-form" style="margin-top:20px;">
             <form id="range_select" action="/lab_datas_db" method="GET">
               <input type="hidden" class="timezone" name="timezone" value="{{ timezone }}"/>
               <input type="hidden" name="node" value="{{ node }}">
-  
+
               <input type="radio" name="range_time" value="3" id="radio_3" {% if range_time == '3' %}checked{% endif %}/> <label for="radio_3">3h</label>
               <input type="radio" name="range_time" value="6" id="radio_6" {% if range_time == '6' %}checked{% endif %}/> <label for="radio_6">6h</label>
               <input type="radio" name="range_time" value="12" id="radio_12" {% if range_time == '12' %}checked{% endif %}/> <label for="radio_12">12h</label>
               <input type="radio" name="range_time" value="24" id="radio_24" {% if range_time == '24' %}checked{% endif %}/> <label for="radio_24">24h</label>
             </form>
           </div>
-        </div>
-  
-        <div class="middle-column">
-          <h2>Graphiques</h2>
-          <div id="graph_temp"></div>
-          <div id="graph_humid"></div>
-          <div id="graph_press"></div>
-        </div>
-  
-        <div class="right-column">
-          <h2>Données historiques</h2>
-          <h3>Températures, humidité, pression</h3>
-          <p>Liste de {{ combined_data|length }} éléments</p>
-          <table class="u-full-width">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>°C</th>
-                <th>%</th>
-                <th>hPa</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in combined_data %}
-              <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ row.date }}</td>
-                <td>{{ row.temp }}</td>
-                <td>{{ row.humidity }}</td>
-                <td>{{ row.pressure }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
+          <div id="gauges-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+              <canvas id="gauge1" width="150" height="150"></canvas>
+              <canvas id="gauge2" width="150" height="150"></canvas>
+              <canvas id="gauge3" width="150" height="150"></canvas>
+          </div>
+
       </div>
-  
-      <script src="//code.jquery.com/jquery-3.7.1.min.js"></script>
-      <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.css"/>
-      <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.full.min.js"></script>
-      <script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.7/jstz.min.js"></script>
-      <script>
-          // define darkMode globally
-          var darkMode = (localStorage.getItem('darkMode') === 'true');
-          // apply initial mode
-          if (darkMode) {
-            document.body.classList.add('dark-mode');
-          }
-        </script>
-      <script>
-        jQuery(document).ready(function() {
-          // initializing datetimepickers
-          jQuery('#datetimepicker1').datetimepicker({ format:'Y-m-d H:i:s' });
-          jQuery('#datetimepicker2').datetimepicker({ format:'Y-m-d H:i:s' });
-  
-          // when changing the time range with radios
-          jQuery("#range_select input[type=radio]").click(function() {
-            const range = jQuery(this).val();
-            const now = new Date();
-            const fromDate = new Date(now.getTime() - range * 3600 * 1000);
-            const toDateStr = now.toISOString().slice(0, 19).replace("T", " ");
-            const fromDateStr = fromDate.toISOString().slice(0, 19).replace("T", " ");
-  
-            jQuery("#datetimepicker1").val(fromDateStr);
-            jQuery("#datetimepicker2").val(toDateStr);
-  
-            // submit the form automatically
-            jQuery("#range_select").submit();
-          });
-  
-          // initialize radio based on current range_time
-          const currentRange = "{{ range_time }}";
-          jQuery("#range_select input[value='" + currentRange + "']").prop("checked", true);
-  
-          // on submitting the datetime_range form, the timezone is determined dynamically
-          jQuery("#datetime_range").submit(function(event) {
-            const timezone = jstz.determine();
-            jQuery(".timezone").val(timezone.name());
-          });
+
+      <!-- render graphs -->
+      <div class="middle-column">
+        <h2>Graphiques</h2>
+        <div id="graph_temp"></div>
+        <div id="graph_humid"></div>
+        <div id="graph_press"></div>
+      </div>
+
+      <!-- render historical data -->
+      <div class="right-column">
+        <h2>Données historiques</h2>
+        <h3>Température, humidité, pression</h3>
+        <p>Liste de {{ combined_data|length }} éléments</p>
+        <table class="u-full-width">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>°C</th>
+              <th>%</th>
+              <th>hPa</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in combined_data %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ row.date }}</td>
+              <td>{{ row.temp }}</td>
+              <td>{{ row.humidity }}</td>
+              <td>{{ row.pressure }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="//code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.css"/>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.full.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.7/jstz.min.js"></script>
+    <script>
+        // handle dark mode on page load
+        var darkMode = (localStorage.getItem('darkMode') === 'true');
+        if (darkMode) {
+          document.body.classList.add('dark-mode');
+        }
+    </script>
+    <script>
+      // initialize datetime pickers
+      jQuery(document).ready(function() {
+        jQuery('#datetimepicker1').datetimepicker({ format:'Y-m-d H:i:s' });
+        jQuery('#datetimepicker2').datetimepicker({ format:'Y-m-d H:i:s' });
+
+        // handle time range radio changes
+        jQuery("#range_select input[type=radio]").click(function() {
+          const range = jQuery(this).val();
+          const now = new Date();
+          const fromDate = new Date(now.getTime() - range * 3600 * 1000);
+          const toDateStr = now.toISOString().slice(0, 19).replace("T", " ");
+          const fromDateStr = fromDate.toISOString().slice(0, 19).replace("T", " ");
+
+          jQuery("#datetimepicker1").val(fromDateStr);
+          jQuery("#datetimepicker2").val(toDateStr);
+
+          jQuery("#range_select").submit();
         });
-      </script>
-  
-      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-      <script>
-        google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(createTempChart);
-        google.charts.setOnLoadCallback(createHumChart);
-        google.charts.setOnLoadCallback(createPressChart);
-  
-        function getChartOptions(title, vAxisTitle, darkMode) {
-          return {
-              width: '100%',
-              height: 300,
-              backgroundColor: darkMode ? '#121212' : '#ffffff',
-              chartArea: {
-              backgroundColor: darkMode ? '#121212' : '#ffffff'
-              },
-              title: title,
-              titleTextStyle: {
-              color: darkMode ? '#ccc' : '#000'
-              },
-              curveType: 'function',
-              hAxis: {
-              title: "Date",
-              format: 'dd-MMM-yyyy HH:mm',
-              textStyle: { color: darkMode ? '#ccc' : '#000' },
-              titleTextStyle: { color: darkMode ? '#ccc' : '#000' },
-              gridlines: { color: darkMode ? '#333' : '#CCC' }
-              },
-              vAxis: {
-              title: vAxisTitle,
-              textStyle: { color: darkMode ? '#ccc' : '#000' },
-              titleTextStyle: { color: darkMode ? '#ccc' : '#000' },
-              gridlines: { color: darkMode ? '#333' : '#CCC' }
-              },
-              legend: {
-              textStyle:{ color: darkMode ? '#ccc':'#000' }
-              },
-              series: {
-              0: { color: '#4caf50', lineWidth: 2, areaOpacity: 0.2 }
-              }
-          };
-          }
-  
-  
-        function createTempChart() {
+
+        const currentRange = "{{ range_time }}";
+        jQuery("#range_select input[value='" + currentRange + "']").prop("checked", true);
+
+        jQuery("#datetime_range").submit(function(event) {
+          const timezone = jstz.determine();
+          jQuery(".timezone").val(timezone.name());
+        });
+      });
+    </script>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+      // draw charts with google charts
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(createTempChart);
+      google.charts.setOnLoadCallback(createHumChart);
+      google.charts.setOnLoadCallback(createPressChart);
+
+      function getChartOptions(title, vAxisTitle, darkMode) {
+        return {
+            width: '100%',
+            height: 300,
+            backgroundColor: darkMode ? '#121212' : '#ffffff',
+            chartArea: {
+            backgroundColor: darkMode ? '#121212' : '#ffffff'
+            },
+            title: title,
+            titleTextStyle: {
+            color: darkMode ? '#ccc' : '#000'
+            },
+            curveType: 'function',
+            hAxis: {
+            title: "Date",
+            format: 'dd-MMM-yyyy HH:mm',
+            textStyle: { color: darkMode ? '#ccc' : '#000' },
+            titleTextStyle: { color: darkMode ? '#ccc' : '#000' },
+            gridlines: { color: darkMode ? '#333' : '#CCC' }
+            },
+            vAxis: {
+            title: vAxisTitle,
+            textStyle: { color: darkMode ? '#ccc' : '#000' },
+            titleTextStyle: { color: darkMode ? '#ccc' : '#000' },
+            gridlines: { color: darkMode ? '#333' : '#CCC' }
+            },
+            legend: {
+            textStyle:{ color: darkMode ? '#ccc':'#000' }
+            },
+            series: {
+            0: { color: '#4caf50', lineWidth: 2, areaOpacity: 0.2 }
+            }
+        };
+      }
+      function createTempChart() {
+          // draw temperature chart
           var data = new google.visualization.DataTable();
           data.addColumn('datetime', 'Heure');
           data.addColumn('number', 'Température');
@@ -449,11 +602,13 @@
             {% endfor %}
           ]);
           var options = getChartOptions('Température', 'Température (°C)', darkMode);
+          // use area chart for temperature
           var chart = new google.visualization.AreaChart(document.getElementById('graph_temp'));
           chart.draw(data, options);
         }
-  
+
         function createHumChart() {
+          // draw humidity chart
           var data = new google.visualization.DataTable();
           data.addColumn('datetime', 'Heure');
           data.addColumn('number', 'Humidité');
@@ -463,11 +618,45 @@
             {% endfor %}
           ]);
           var options = getChartOptions('Humidité', 'Humidité (%)', darkMode);
+          // use area chart for humidity
           var chart = new google.visualization.AreaChart(document.getElementById('graph_humid'));
           chart.draw(data, options);
         }
-  
+
+        function createTempChart() {
+          // create temperature chart data table
+          var data = new google.visualization.DataTable();
+          data.addColumn('datetime', 'Heure');
+          data.addColumn('number', 'Température');
+          data.addRows([
+            {% for row in temp %}
+            [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
+            {% endfor %}
+          ]);
+          // set options and draw temperature chart
+          var options = getChartOptions('Température', 'Température (°C)', darkMode);
+          var chart = new google.visualization.AreaChart(document.getElementById('graph_temp'));
+          chart.draw(data, options);
+        }
+
+        function createHumChart() {
+          // create humidity chart data table
+          var data = new google.visualization.DataTable();
+          data.addColumn('datetime', 'Heure');
+          data.addColumn('number', 'Humidité');
+          data.addRows([
+            {% for row in hum %}
+            [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
+            {% endfor %}
+          ]);
+          // set options and draw humidity chart
+          var options = getChartOptions('Humidité', 'Humidité (%)', darkMode);
+          var chart = new google.visualization.AreaChart(document.getElementById('graph_humid'));
+          chart.draw(data, options);
+        }
+
         function createPressChart() {
+          // create pressure chart data table
           var data = new google.visualization.DataTable();
           data.addColumn('datetime', 'Heure');
           data.addColumn('number', 'Pression');
@@ -476,34 +665,35 @@
             [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
             {% endfor %}
           ]);
+          // set options and draw pressure chart
           var options = getChartOptions('Pression', 'Pression (hPa)', darkMode);
           var chart = new google.visualization.AreaChart(document.getElementById('graph_press'));
           chart.draw(data, options);
         }
-  
+
       </script>
       <script>
-          var plotlyLink = null; // global variable to store the link once obtained
-  
-          // live button
+          var plotlyLink = null; // store plotly link once obtained
+
+          // handle live button
           document.getElementById('btn-live').addEventListener('click', function() {
             window.location.href = "/lab_datas?node={{ node }}";
           });
-  
-          // plotly button
+
+          // handle plotly button
           document.getElementById('btn-plotly').addEventListener('click', function() {
             var btnPlotly = this;
-  
-            // if I already have a plotly link, just open it
+
+            // if plotly link already present, just open
             if (plotlyLink) {
               window.open(plotlyLink, "_blank");
               return;
             }
-  
-            // otherwise, I generate it
+
+            // generate plotly link if not present
             btnPlotly.classList.add('clicked');
             btnPlotly.textContent = "...envoie";
-  
+
             jQuery.get("/to_plotly", {
               from: "{{ start_date }}",
               to: "{{ end_date }}",
@@ -511,40 +701,43 @@
               node: "{{ node }}"
             })
             .done(function(data) {
+              // update button text and store plotly link
               plotlyLink = data;
               btnPlotly.textContent = "Afficher";
               btnPlotly.classList.remove('clicked');
             })
             .fail(function() {
+              // handle failure
               btnPlotly.textContent = "Erreur";
               btnPlotly.classList.remove('clicked');
             });
           });
-  
+
           // handle interval dropdown menu
           var intervalBtn = document.getElementById('interval-btn');
           var intervalDropdown = document.getElementById('interval-dropdown');
-  
+
           intervalBtn.addEventListener('click', function() {
+            // toggle dropdown display
             if(intervalDropdown.style.display === 'none' || intervalDropdown.style.display === '') {
               intervalDropdown.style.display = 'block';
             } else {
               intervalDropdown.style.display = 'none';
             }
           });
-  
-          // when choosing an interval
+
+          // handle interval selection
           var options = intervalDropdown.querySelectorAll('div[data-value]');
           options.forEach(function(opt) {
             opt.addEventListener('click', function() {
               var val = this.getAttribute('data-value');
-              // update the button text
+              // update button text
               intervalBtn.textContent = "Intervale " + val;
-  
-              // hide the menu
+
+              // hide dropdown
               intervalDropdown.style.display = 'none';
-  
-              // send ajax request to update cron
+
+              // update cron with ajax request
               jQuery.post("/update_cron", { interval: val })
               .done(function(response) {
                   console.log("Cron updated with interval:", response.selected_interval);
@@ -556,22 +749,238 @@
           });
       </script>
       <script>
+          // redraw charts on theme change
           function drawAllCharts() {
-          createTempChart();
-          createHumChart();
-          createPressChart();
+            createTempChart();
+            createHumChart();
+            createPressChart();
           }
-  
+
+          // handle theme toggle
           document.getElementById('btn-mode').addEventListener('click', function() {
-          darkMode = !darkMode;
-          if (darkMode) {
+            darkMode = !darkMode;
+            if (darkMode) {
               document.body.classList.add('dark-mode');
-          } else {
+            } else {
               document.body.classList.remove('dark-mode');
-          }
-          localStorage.setItem('darkMode', darkMode);
-          drawAllCharts(); 
+            }
+            localStorage.setItem('darkMode', darkMode);
+            drawAllCharts();
           });
-        </script>
+      </script>
+      <script>
+          // handle current time display
+          $(document).ready(function () {
+            function currentTime() {
+              var date = new Date();
+              var day = date.getDay();
+              var hour = date.getHours();
+              var min = date.getMinutes();
+              var sec = date.getSeconds();
+              var month = date.getMonth();
+              var currDate = date.getDate();
+              var year = date.getFullYear();
+
+              var jours = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+              var mois = [
+                "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet",
+                "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+              ];
+
+              var midDay = "AM";
+              midDay = hour >= 12 ? "PM" : "AM";
+              hour = hour == 0 ? 12 : hour > 12 ? hour - 12 : hour;
+              hour = updateTime(hour);
+              min = updateTime(min);
+              sec = updateTime(sec);
+              currDate = updateTime(currDate);
+
+              $("#time").html(`${hour}:${min}`);
+              $("#sec").html(`${sec}`);
+              $("#med").html(`${midDay}`);
+              $("#full-date").html(`${currDate} ${mois[month]} ${year}`);
+
+              var showDay = $(".dayDiv span");
+              showDay.css("opacity", "0.4"); 
+              showDay.eq(day).css("opacity", "1"); 
+              showDay.eq(day).text(jours[day]); 
+            }
+
+            function updateTime(x) {
+              return x < 10 ? "0" + x : x;
+            }
+
+            setInterval(currentTime, 1000);
+            currentTime(); 
+          });
+      </script>
+      <script>
+          // handle chrono and timer logic
+          $(document).ready(function () {
+            let mode = "chrono"; 
+            let timerInterval;
+            let totalSeconds = 0;
+            let timerDuration = 30 * 60; 
+            let running = false; 
+
+            function setEditable(isEditable) {
+              $("#chrono-timer-display").attr("contenteditable", isEditable);
+            }
+
+            function formatTime(seconds) {
+              const h = Math.floor(seconds / 3600);
+              const m = Math.floor((seconds % 3600) / 60);
+              const s = seconds % 60;
+              return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+            }
+
+            function updateDisplay() {
+              // update chrono or timer display
+              if (mode === "chrono") {
+                $("#chrono-timer-display").html(formatTime(totalSeconds));
+              } else {
+                const remaining = timerDuration - totalSeconds;
+                $("#chrono-timer-display").html(formatTime(Math.max(remaining,0)));
+              }
+
+              // update mode button text
+              if (mode === "chrono") {
+                $("#switch-mode").text("Minuteur");
+              } else {
+                $("#switch-mode").text("Chrono");
+              }
+
+              // update start button text
+              if (running) {
+                $("#start-button").text("Stop");
+              } else {
+                $("#start-button").text("Start");
+              }
+            }
+
+            function stopTimer() {
+              // stop timer or chrono
+              clearInterval(timerInterval);
+              timerInterval = null;
+              running = false;
+              updateDisplay();
+            }
+
+            function startTimer() {
+              // start timer or chrono
+              stopTimer(); 
+              running = true;
+              timerInterval = setInterval(() => {
+                totalSeconds++;
+                if (mode === "timer" && totalSeconds >= timerDuration) {
+                  stopTimer();
+                }
+                updateDisplay();
+              }, 1000);
+              updateDisplay();
+            }
+
+            function resetTimer() {
+              // reset timer or chrono
+              stopTimer();
+              totalSeconds = 0;
+              if (mode === "timer") {
+                timerDuration = 1800; 
+                $("#chrono-timer-display").html(formatTime(timerDuration));
+              } else {
+                $("#chrono-timer-display").html("00:00:00");
+              }
+              updateDisplay();
+            }
+
+            function timeToSeconds(timeStr) {
+              // convert displayed time to seconds
+              const parts = timeStr.split(":").map(Number);
+              let sec = 0;
+              if (parts.length === 3) {
+                sec = parts[0]*3600 + parts[1]*60 + parts[2];
+              } else if (parts.length === 2) {
+                sec = parts[0]*60 + parts[1];
+              } else if (parts.length === 1) {
+                sec = parts[0];
+              }
+              return sec;
+            }
+
+            $("#switch-mode").click(function () {
+              // toggle between timer and chrono
+              resetTimer();
+              mode = (mode === "chrono") ? "timer" : "chrono";
+              if (mode === "timer") {
+                setEditable(true);
+                $("#chrono-timer-display").html("00:30:00"); 
+              } else {
+                setEditable(false);
+                $("#chrono-timer-display").html("00:00:00");
+              }
+              updateDisplay();
+            });
+
+            $("#start-button").click(function() {
+              // handle start/stop button
+              if (!running) {
+                if (mode === "timer") {
+                  const val = $("#chrono-timer-display").text().trim();
+                  const sec = timeToSeconds(val);
+                  if (sec > 0) {
+                    timerDuration = sec;
+                  } else {
+                    timerDuration = 1800; 
+                    $("#chrono-timer-display").html("00:30:00");
+                  }
+                  totalSeconds = 0;
+                } else {
+                  totalSeconds = 0;
+                }
+                startTimer();
+              } else {
+                stopTimer();
+              }
+            });
+
+            setEditable(false);
+            updateDisplay();
+          });
+      </script>
+      <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
+      <script>
+        // handle gauges initialization
+        document.addEventListener("DOMContentLoaded", function () {
+          const opts = {
+            angle: -0.2, 
+            lineWidth: 0.2, 
+            radiusScale: 1, 
+            pointer: {
+              length: 0.6, 
+              strokeWidth: 0.035, 
+              color: '#000000' 
+            },
+            limitMax: false,
+            limitMin: false,
+            colorStart: '#6FADCF', 
+            colorStop: '#8FC0DA',
+            strokeColor: '#E0E0E0', 
+            generateGradient: true,
+            highDpiSupport: true 
+          };
+
+          const gauge1 = new Gauge(document.getElementById("gauge1")).setOptions(opts);
+          const gauge2 = new Gauge(document.getElementById("gauge2")).setOptions(opts);
+          const gauge3 = new Gauge(document.getElementById("gauge3")).setOptions(opts);
+
+          // set initial gauge values
+          [gauge1, gauge2, gauge3].forEach((gauge, index) => {
+            gauge.maxValue = 100; 
+            gauge.setMinValue(0); 
+            gauge.animationSpeed = 32; 
+            gauge.set(index * 25 + 25); 
+          });
+        });
+      </script>
     </body>
-  </html>
+</html>
