@@ -23,15 +23,15 @@
 
         /* style dashboard title */
         .dashboard-title {
-          font-size: 3.5em;
-          font-weight: 700;
-          background: linear-gradient(90deg, #0078d7, #00c6ff);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          text-transform: uppercase;
-          margin: 0;
-          letter-spacing: 2px;
-        }
+            font-size: 3.5em;
+            font-weight: 700;
+            background: linear-gradient(to top, #0078d7, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            margin: 0;
+            letter-spacing: 2px;
+            }
 
         .title-icon {
           font-size: 0.8em;
@@ -95,6 +95,7 @@
 
         h2, h1 {
           margin-top: 0;
+          font-weight: bold;
         }
 
         .button-primary {
@@ -187,21 +188,27 @@
         }
 
         .my-btn, .interval-btn {
-          background-color: #0078d7;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          font-size: 14px;
-          cursor: pointer;
-          transition: background-color 0.3s;
+            background: linear-gradient(to top, #0078d7, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-color: transparent;
+            border: 1px solid #0078d7;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
 
         .my-btn:hover, .interval-btn:hover {
-          background-color: #005fa3;
+            background: linear-gradient(to top, #005fa3, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .my-btn.clicked {
-          background-color: #00a300;
+            background: linear-gradient(to top, #00a300, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         table.u-full-width, table.u-full-width th, table.u-full-width td {
@@ -323,7 +330,6 @@
         .switch-button {
           font-size: 1.5rem;
           border: none;
-          padding: 5px 15px;
           border-radius: 4px;
           cursor: pointer;
           color: white;
@@ -337,7 +343,6 @@
         #start-button {
           font-size: 1.5rem;
           border: none;
-          padding: 5px 15px;
           border-radius: 4px;
           cursor: pointer;
           color: white;
@@ -363,6 +368,36 @@
           border: 1px solid #ddd;
           border-radius: 8px;
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .action-button {
+        font-size: 1.5rem;
+        border: none;
+        padding: 5px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        color: white;
+        background: green; 
+        }
+        body.dark-mode .action-button {
+        background: linear-gradient(to bottom, white, green); 
+        }
+
+        .dropdown-select {
+            font-size: 1.5rem;
+            color: black; 
+            background: green;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            text-align: center;
+        }
+        body.dark-mode .dropdown-select {
+        background: linear-gradient(to bottom, white, green);
+        color: black !important;
         }
     </style>
   </head>
@@ -424,44 +459,37 @@
               </div>
             </div>
           </div>
-
           <!-- display cellule links and forms -->
-          <h2>Cellule {{ node }}</h2>
-          <div style="margin-bottom:20px;">
-            {% for n in range(1,7) %}
-              {% if node == n|string %}
-                <span class="node-button-selected">Cellule {{ n }}</span>
-              {% else %}
-                <a class="node-button" href="/lab_datas_db?from={{ start_date }}&to={{ end_date }}&range_time={{ range_time }}&timezone={{ timezone }}&node={{ n }}">Cellule {{ n }}</a>
-              {% endif %}
-            {% endfor %}
-          </div>
+            <h2 class="selection-title" style="text-align:center; font-size:2rem; margin-bottom:20px;">Choix de la cellule {{ node }} et plage horaire</h2>
+            <div style="display:flex; gap:20px; width:100%; margin-bottom:20px;">
+                <form id="data_selection" action="/lab_datas_db" method="GET" style="flex:1; display:flex; flex-direction:column; gap:10px;">
+            
+                <div style="display:flex; gap:20px; width:100%;">
+                    <select id="node-select" name="node" class="dropdown-select" style="flex:1;">
+                    {% for n in range(1,7) %}
+                        <option value="{{ n }}" {% if node == n|string %}selected{% endif %}>Cellule {{ n }}</option>
+                    {% endfor %}
+                    </select>
+                    <select id="range-select" name="range_time" class="dropdown-select" style="flex:1;">
+                    <option value="3" {% if range_time == '3' %}selected{% endif %}>3h</option>
+                    <option value="6" {% if range_time == '6' %}selected{% endif %}>6h</option>
+                    <option value="12" {% if range_time == '12' %}selected{% endif %}>12h</option>
+                    <option value="24" {% if range_time == '24' %}selected{% endif %}>24h</option>
+                    </select>
+                </div>
+            
+                <!-- Inputs de datetime et timezone -->
+                <label for="from">Depuis le</label>
+                <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from" style="color:black;"/>
+            
+                <label for="to">À</label>
+                <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to" style="color:black;"/>
+            
+                <input type="hidden" class="timezone" name="timezone" value="{{ timezone }}">
 
-          <form id="datetime_range" action="/lab_datas_db" method="GET">
-            <label for="from">Depuis le</label>
-            <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from">
-
-            <label for="to">À</label>
-            <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to">
-
-            <input type="hidden" class="timezone" name="timezone" value="{{ timezone }}">
-            <input type="hidden" name="node" value="{{ node }}">
-            <input type="hidden" name="range_time" value="{{ range_time }}">
-
-            <input class="button-primary" type="submit" value="Valider" style="margin-top:10px;">
-          </form>
-
-          <div class="time-range-form" style="margin-top:20px;">
-            <form id="range_select" action="/lab_datas_db" method="GET">
-              <input type="hidden" class="timezone" name="timezone" value="{{ timezone }}"/>
-              <input type="hidden" name="node" value="{{ node }}">
-
-              <input type="radio" name="range_time" value="3" id="radio_3" {% if range_time == '3' %}checked{% endif %}/> <label for="radio_3">3h</label>
-              <input type="radio" name="range_time" value="6" id="radio_6" {% if range_time == '6' %}checked{% endif %}/> <label for="radio_6">6h</label>
-              <input type="radio" name="range_time" value="12" id="radio_12" {% if range_time == '12' %}checked{% endif %}/> <label for="radio_12">12h</label>
-              <input type="radio" name="range_time" value="24" id="radio_24" {% if range_time == '24' %}checked{% endif %}/> <label for="radio_24">24h</label>
-            </form>
-          </div>
+                <input class="action-button" type="submit" value="Valider" style="margin-top:10px; text-align:center;">
+                </form>
+            </div>
           <div id="gauges-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
               <canvas id="gauge1" width="150" height="150"></canvas>
               <canvas id="gauge2" width="150" height="150"></canvas>
@@ -547,6 +575,29 @@
           jQuery(".timezone").val(timezone.name());
         });
       });
+      jQuery(document).ready(function() {
+        // quand on change de cellule ou de plage horaire
+        jQuery('#node-select, #range-select').change(function() {
+            const node = jQuery('#node-select').val();
+            const range = jQuery('#range-select').val();
+
+            // recalcul des dates from/to en fonction de range_time
+            const now = new Date();
+            const fromDate = new Date(now.getTime() - range * 3600 * 1000);
+            const toDateStr = now.toISOString().slice(0, 19).replace("T", " ");
+            const fromDateStr = fromDate.toISOString().slice(0, 19).replace("T", " ");
+
+            jQuery("#datetimepicker1").val(fromDateStr);
+            jQuery("#datetimepicker2").val(toDateStr);
+
+            // mise à jour du champ hidden timezone
+            const timezone = jstz.determine();
+            jQuery(".timezone").val(timezone.name());
+
+            // soumission du formulaire
+            jQuery("#data_selection").submit();
+        });
+        });
     </script>
 
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
