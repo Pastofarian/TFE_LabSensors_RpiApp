@@ -115,6 +115,28 @@ def lab_datas_db():
             'pressure': round(p_row[2], 2)
         })
 
+    # stats calculation min, max, moyenne
+    if len(combined_data) > 0:
+        temp_values = [d['temp'] for d in combined_data]
+        hum_values = [d['humidity'] for d in combined_data]
+        press_values = [d['pressure'] for d in combined_data]
+
+        min_temp = min(temp_values)
+        max_temp = max(temp_values)
+        avg_temp = sum(temp_values)/len(temp_values)
+
+        min_hum = min(hum_values)
+        max_hum = max(hum_values)
+        avg_hum = sum(hum_values)/len(hum_values)
+
+        min_press = min(press_values)
+        max_press = max(press_values)
+        avg_press = sum(press_values)/len(press_values)
+    else:
+        min_temp = max_temp = avg_temp = None
+        min_hum = max_hum = avg_hum = None
+        min_press = max_press = avg_press = None
+
     # render template with adjusted and combined data
     return render_template(
         "lab_datas_db.html",
@@ -130,7 +152,16 @@ def lab_datas_db():
         press_items=len(pressures),
         node=node,
         timezone=timezone,
-        selected_interval=selected_interval
+        selected_interval=selected_interval,
+        min_temp=min_temp,
+        max_temp=max_temp,
+        avg_temp=avg_temp,
+        min_hum=min_hum,
+        max_hum=max_hum,
+        avg_hum=avg_hum,
+        min_press=min_press,
+        max_press=max_press,
+        avg_press=avg_press
     )
 
 def get_datas():
@@ -288,4 +319,3 @@ def check_date(d):
 if __name__ == "__main__":
     # run the flask app on specified host and port
     app.run(host='0.0.0.0', port=8080)
-

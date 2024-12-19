@@ -18,7 +18,7 @@
           font-family: 'Raleway', sans-serif;
           margin: 0;
           padding: 0;
-          overflow: hidden; /* prevents entire page scrolling */
+          /*overflow: hidden; /* prevents entire page scrolling */
         }
 
         /* style dashboard title */
@@ -277,7 +277,7 @@
 
         /* handle font color for clock */
         .font-color {
-          background: green; 
+          background: green;
           -webkit-text-fill-color: transparent;
           background-clip: text;
           -webkit-background-clip: text;
@@ -333,11 +333,11 @@
           border-radius: 4px;
           cursor: pointer;
           color: white;
-          background: green; 
+          background: green;
         }
 
         body.dark-mode .switch-button {
-          background: linear-gradient(to bottom, white, green); 
+          background: linear-gradient(to bottom, white, green);
         }
 
         #start-button {
@@ -346,11 +346,11 @@
           border-radius: 4px;
           cursor: pointer;
           color: white;
-          background: green; 
+          background: green;
         }
 
         body.dark-mode #start-button {
-          background: linear-gradient(to bottom, white, green); 
+          background: linear-gradient(to bottom, white, green);
         }
 
         #timer-input {
@@ -365,9 +365,9 @@
         }
 
         #gauges-container canvas {
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border: none;
+            background: transparent; 
+            box-shadow: none;
         }
         .action-button {
         font-size: 1.5rem;
@@ -376,15 +376,16 @@
         border-radius: 4px;
         cursor: pointer;
         color: white;
-        background: green; 
+        background: green;
         }
         body.dark-mode .action-button {
-        background: linear-gradient(to bottom, white, green); 
+        background: linear-gradient(to bottom, white, green);
         }
 
         .dropdown-select {
-            font-size: 1.5rem;
-            color: black; 
+            font-size: 2rem;
+            font-weight: bold;
+            color: black;
             background: green;
             border: none;
             border-radius: 4px;
@@ -394,10 +395,24 @@
             -moz-appearance: none;
             appearance: none;
             text-align: center;
+            text-transform: uppercase;
         }
         body.dark-mode .dropdown-select {
         background: linear-gradient(to bottom, white, green);
         color: black !important;
+        }
+
+        .gauge-container {
+            text-align: center;
+            width: 300px;
+            margin: 0 auto;
+            height: 300px;
+            padding: 20px
+        }
+
+        .gauge-value {
+            font-size: 2em;
+            font-weight: bold;
         }
     </style>
   </head>
@@ -438,13 +453,13 @@
                 <span class="font-color" id="med"></span>
               </div>
               <div class="dayDiv">
-                <span class="font-color day">DIM</span>
-                <span class="font-color day">LUN</span>
-                <span class="font-color day">MAR</span>
-                <span class="font-color day">MER</span>
-                <span class="font-color day">JEU</span>
-                <span class="font-color day">VEN</span>
-                <span class="font-color day">SAM</span>
+                <span class="font-color day">Dim</span>
+                <span class="font-color day">Lun</span>
+                <span class="font-color day">Mar</span>
+                <span class="font-color day">Mer</span>
+                <span class="font-color day">Jeu</span>
+                <span class="font-color day">Ven</span>
+                <span class="font-color day">Sam</span>
               </div>
               <span class="font-color" id="full-date"></span>
             </div>
@@ -463,7 +478,7 @@
             <h2 class="selection-title" style="text-align:center; font-size:2rem; margin-bottom:20px;">Choix de la cellule {{ node }} et plage horaire</h2>
             <div style="display:flex; gap:20px; width:100%; margin-bottom:20px;">
                 <form id="data_selection" action="/lab_datas_db" method="GET" style="flex:1; display:flex; flex-direction:column; gap:10px;">
-            
+
                 <div style="display:flex; gap:20px; width:100%;">
                     <select id="node-select" name="node" class="dropdown-select" style="flex:1;">
                     {% for n in range(1,7) %}
@@ -471,30 +486,78 @@
                     {% endfor %}
                     </select>
                     <select id="range-select" name="range_time" class="dropdown-select" style="flex:1;">
-                    <option value="3" {% if range_time == '3' %}selected{% endif %}>3h</option>
-                    <option value="6" {% if range_time == '6' %}selected{% endif %}>6h</option>
-                    <option value="12" {% if range_time == '12' %}selected{% endif %}>12h</option>
-                    <option value="24" {% if range_time == '24' %}selected{% endif %}>24h</option>
+                    <option value="3" {% if range_time == '3' %}selected{% endif %}>3 heures</option>
+                    <option value="6" {% if range_time == '6' %}selected{% endif %}>6 heures</option>
+                    <option value="12" {% if range_time == '12' %}selected{% endif %}>12 heures</option>
+                    <option value="24" {% if range_time == '24' %}selected{% endif %}>24 heures</option>
                     </select>
                 </div>
-            
+
                 <!-- Inputs de datetime et timezone -->
                 <label for="from">Depuis le</label>
                 <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from" style="color:black;"/>
-            
+
                 <label for="to">À</label>
                 <input class="u-full-width" id="datetimepicker2" type="text" value="{{ end_date }}" name="to" style="color:black;"/>
-            
+
                 <input type="hidden" class="timezone" name="timezone" value="{{ timezone }}">
 
                 <input class="action-button" type="submit" value="Valider" style="margin-top:10px; text-align:center;">
                 </form>
             </div>
-          <div id="gauges-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-              <canvas id="gauge1" width="150" height="150"></canvas>
-              <canvas id="gauge2" width="150" height="150"></canvas>
-              <canvas id="gauge3" width="150" height="150"></canvas>
-          </div>
+            {% if combined_data|length > 0 %}
+            <div style="margin-top:20px; background:transparent;">
+                <table style="border-collapse: collapse; width: 100%; background:transparent;">
+                    <thead style="color: green;">
+                        <tr>
+                            <th style="border-right:1px solid green;"></th>
+                            <th style="border-right:1px solid green;">Température (°C)</th>
+                            <th style="border-right:1px solid green;">Humidité (%)</th>
+                            <th>Pression (hPa)</th>
+                        </tr>
+                    </thead>
+                    <tbody style="background:transparent;">
+                        <tr>
+                            <td style="border-right:1px solid green; font-weight:bold;">Minimum</td>
+                            <td style="border-right:1px solid green;">{{ min_temp }}</td>
+                            <td style="border-right:1px solid green;">{{ min_hum }}</td>
+                            <td>{{ min_press }}</td>
+                        </tr>
+                        <tr>
+                            <td style="border-right:1px solid green; font-weight:bold;">Maximum</td>
+                            <td style="border-right:1px solid green;">{{ max_temp }}</td>
+                            <td style="border-right:1px solid green;">{{ max_hum }}</td>
+                            <td>{{ max_press }}</td>
+                        </tr>
+                        <tr>
+                            <td style="border-right:1px solid green; font-weight:bold;">Moyenne</td>
+                            <td style="border-right:1px solid green;">{{ avg_temp|round(1) }}</td>
+                            <td style="border-right:1px solid green;">{{ avg_hum|round(1) }}</td>
+                            <td>{{ avg_press|round(2) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <div id="gauges-container" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+
+                <div style="text-align:center;">
+                    <div class="gauge-value" id="temp-value"></div>
+                    <canvas id="gauge_temp" width="200" height="200"></canvas>
+                  </div>
+                  
+                  <div style="text-align:center;">
+                    <div class="gauge-value" id="hum-value"></div>
+                    <canvas id="gauge_hum" width="200" height="200"></canvas>
+                  </div>
+                  
+                  <div style="text-align:center;">
+                    <div class="gauge-value" id="press-value"></div>
+                    <canvas id="gauge_press" width="200" height="200"></canvas>
+                  </div>
+              
+              </div>              
 
       </div>
 
@@ -576,12 +639,11 @@
         });
       });
       jQuery(document).ready(function() {
-        // quand on change de cellule ou de plage horaire
+        // when changing cells or range
         jQuery('#node-select, #range-select').change(function() {
             const node = jQuery('#node-select').val();
             const range = jQuery('#range-select').val();
 
-            // recalcul des dates from/to en fonction de range_time
             const now = new Date();
             const fromDate = new Date(now.getTime() - range * 3600 * 1000);
             const toDateStr = now.toISOString().slice(0, 19).replace("T", " ");
@@ -590,11 +652,10 @@
             jQuery("#datetimepicker1").val(fromDateStr);
             jQuery("#datetimepicker2").val(toDateStr);
 
-            // mise à jour du champ hidden timezone
+            // update hidden field timezone
             const timezone = jstz.determine();
             jQuery(".timezone").val(timezone.name());
 
-            // soumission du formulaire
             jQuery("#data_selection").submit();
         });
         });
@@ -832,7 +893,7 @@
               var currDate = date.getDate();
               var year = date.getFullYear();
 
-              var jours = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+              var jours = ["DIM", "LUN", "MAR", "MER", "JEU", "VEN", "SAM"];
               var mois = [
                 "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet",
                 "Août", "Septembre", "Octobre", "Novembre", "Décembre"
@@ -852,9 +913,9 @@
               $("#full-date").html(`${currDate} ${mois[month]} ${year}`);
 
               var showDay = $(".dayDiv span");
-              showDay.css("opacity", "0.4"); 
-              showDay.eq(day).css("opacity", "1"); 
-              showDay.eq(day).text(jours[day]); 
+              showDay.css("opacity", "0.4");
+              showDay.eq(day).css("opacity", "1");
+              showDay.eq(day).text(jours[day]);
             }
 
             function updateTime(x) {
@@ -862,17 +923,17 @@
             }
 
             setInterval(currentTime, 1000);
-            currentTime(); 
+            currentTime();
           });
       </script>
       <script>
           // handle chrono and timer logic
           $(document).ready(function () {
-            let mode = "chrono"; 
+            let mode = "chrono";
             let timerInterval;
             let totalSeconds = 0;
-            let timerDuration = 30 * 60; 
-            let running = false; 
+            let timerDuration = 30 * 60;
+            let running = false;
 
             function setEditable(isEditable) {
               $("#chrono-timer-display").attr("contenteditable", isEditable);
@@ -919,7 +980,7 @@
 
             function startTimer() {
               // start timer or chrono
-              stopTimer(); 
+              stopTimer();
               running = true;
               timerInterval = setInterval(() => {
                 totalSeconds++;
@@ -936,7 +997,7 @@
               stopTimer();
               totalSeconds = 0;
               if (mode === "timer") {
-                timerDuration = 1800; 
+                timerDuration = 1800;
                 $("#chrono-timer-display").html(formatTime(timerDuration));
               } else {
                 $("#chrono-timer-display").html("00:00:00");
@@ -964,7 +1025,7 @@
               mode = (mode === "chrono") ? "timer" : "chrono";
               if (mode === "timer") {
                 setEditable(true);
-                $("#chrono-timer-display").html("00:30:00"); 
+                $("#chrono-timer-display").html("00:30:00");
               } else {
                 setEditable(false);
                 $("#chrono-timer-display").html("00:00:00");
@@ -981,7 +1042,7 @@
                   if (sec > 0) {
                     timerDuration = sec;
                   } else {
-                    timerDuration = 1800; 
+                    timerDuration = 1800;
                     $("#chrono-timer-display").html("00:30:00");
                   }
                   totalSeconds = 0;
@@ -998,40 +1059,140 @@
             updateDisplay();
           });
       </script>
+      
+      {% if combined_data|length > 0 %}
+    <script>
+    var currentTemp = {{ combined_data[-1]['temp']|round(1) }};
+    var currentHum = {{ combined_data[-1]['humidity']|round(1) }};
+    var currentPress = {{ combined_data[-1]['pressure']|round(2) }};
+    </script>
+    {% else %}
+    <script>
+    // Valeurs par défaut si aucune donnée n'est disponible
+    var currentTemp = 20.0;
+    var currentHum = 50.0;
+    var currentPress = 1010.0;
+    </script>
+    {% endif %}
       <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
       <script>
-        // handle gauges initialization
-        document.addEventListener("DOMContentLoaded", function () {
-          const opts = {
-            angle: -0.2, 
-            lineWidth: 0.2, 
-            radiusScale: 1, 
-            pointer: {
-              length: 0.6, 
-              strokeWidth: 0.035, 
-              color: '#000000' 
-            },
-            limitMax: false,
-            limitMin: false,
-            colorStart: '#6FADCF', 
-            colorStop: '#8FC0DA',
-            strokeColor: '#E0E0E0', 
-            generateGradient: true,
-            highDpiSupport: true 
-          };
+        // var currentTemp = {{ last_temp }}; 
+        // var minValTemp = {{ min_temp }}; 
+        // var maxValTemp = {{ max_temp }};
+        
+        var currentTemp = {{ avg_temp|round(1) if avg_temp else 22.0 }}; 
+        var minValTemp = {{ min_temp if min_temp else 10 }}; 
+        var maxValTemp = {{ max_temp if max_temp else 35 }}; 
+        
+        var currentHum = {{ avg_hum|round(1) if avg_hum else 50.0 }};
+        var minValHum = {{ min_hum if min_hum else 20 }};
+        var maxValHum = {{ max_hum if max_hum else 80 }};
+        
+        var currentPress = {{ avg_press|round(2) if avg_press else 1000 }};
+        var minValPress = {{ min_press if min_press else 900 }};
+        var maxValPress = {{ max_press if max_press else 1100 }};
+        
+        
+        function getGaugeOptions(type, darkMode) {
+  let staticZones;
+  let staticLabels;
 
-          const gauge1 = new Gauge(document.getElementById("gauge1")).setOptions(opts);
-          const gauge2 = new Gauge(document.getElementById("gauge2")).setOptions(opts);
-          const gauge3 = new Gauge(document.getElementById("gauge3")).setOptions(opts);
+  let labelColor = darkMode ? "#ffffff" : "#000000";
 
-          // set initial gauge values
-          [gauge1, gauge2, gauge3].forEach((gauge, index) => {
-            gauge.maxValue = 100; 
-            gauge.setMinValue(0); 
-            gauge.animationSpeed = 32; 
-            gauge.set(index * 25 + 25); 
-          });
-        });
-      </script>
+  if (type === 'temp') {
+
+    staticZones = [
+      { strokeStyle: "#F03E3E", min: 10,    max: 13 },  
+      { strokeStyle: "#FFDD00", min: 13,   max: 17 },  
+      { strokeStyle: "#30B32D", min: 17,   max: 23 },  
+      { strokeStyle: "#FFDD00", min: 23,   max: 30 },  
+      { strokeStyle: "#F03E3E", min: 30,   max: 35 }   
+    ];
+    staticLabels = {
+      font: "12px sans-serif",
+      labels: [10, 13, 17, 23, 30, 35],
+      color: labelColor,
+      fractionDigits: 0
+    };
+  } else if (type === 'hum') {
+    staticZones = [
+      { strokeStyle: "#F03E3E", min: 20,   max: 25 },
+      { strokeStyle: "#FFDD00", min: 25,  max: 40 },
+      { strokeStyle: "#30B32D", min: 40,  max: 60 },
+      { strokeStyle: "#FFDD00", min: 60,  max: 80 },
+      { strokeStyle: "#F03E3E", min: 80,  max: 85 }
+    ];
+    staticLabels = {
+      font: "12px sans-serif",
+      labels: [20,25,40,60,80,85],
+      color: labelColor,
+      fractionDigits: 0
+    };
+  } else if (type === 'press') {
+    staticZones = [
+      { strokeStyle: "#F03E3E", min: 955, max: 960 },
+      { strokeStyle: "#FFDD00", min: 960, max: 990 },
+      { strokeStyle: "#30B32D", min: 990, max: 1030 },
+      { strokeStyle: "#FFDD00", min: 1030, max: 1070 },
+      { strokeStyle: "#F03E3E", min: 1070, max: 1075 }
+    ];
+    staticLabels = {
+      font: "12px sans-serif",
+      labels: [955,990,1030,1075],
+      color: labelColor,
+      fractionDigits: 0
+    };
+  }
+
+  return {
+    angle: -0.6,          
+    lineWidth: 0.2,
+    radiusScale: 0.8,
+    pointer: {
+      length: 0.6,
+      strokeWidth: 0.035,
+      color: '#FFFFFF'
+    },
+    limitMax: false,
+    limitMin: false,
+    highDpiSupport: true,
+    staticZones: staticZones,
+    staticLabels: staticLabels
+  };
+}
+
+function initGauges() {
+  var tempOpts = getGaugeOptions('temp', darkMode);
+  var gaugeTemp = new Gauge(document.getElementById("gauge_temp")).setOptions(tempOpts);
+  gaugeTemp.maxValue = 40;
+  gaugeTemp.setMinValue(0);
+  gaugeTemp.animationSpeed = 32;
+  gaugeTemp.set(currentTemp);
+  document.getElementById("temp-value").textContent = currentTemp.toFixed(1) + " °C";
+
+  var humOpts = getGaugeOptions('hum', darkMode);
+  var gaugeHum = new Gauge(document.getElementById("gauge_hum")).setOptions(humOpts);
+  gaugeHum.maxValue = 100;
+  gaugeHum.setMinValue(0);
+  gaugeHum.animationSpeed = 32;
+  gaugeHum.set(currentHum);
+  document.getElementById("hum-value").textContent = currentHum.toFixed(1) + " %";
+
+  var pressOpts = getGaugeOptions('press', darkMode);
+  var gaugePress = new Gauge(document.getElementById("gauge_press")).setOptions(pressOpts);
+  gaugePress.maxValue = 1100;
+  gaugePress.setMinValue(900);
+  gaugePress.animationSpeed = 32;
+  gaugePress.set(currentPress);
+  document.getElementById("press-value").textContent = currentPress.toFixed(2) + " hPa";
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  initGauges();
+});
+
+
+</script>
+      
     </body>
 </html>
