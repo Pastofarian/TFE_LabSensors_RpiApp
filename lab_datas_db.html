@@ -366,7 +366,7 @@
 
         #gauges-container canvas {
             border: none;
-            background: transparent; 
+            background: transparent;
             box-shadow: none;
         }
         .action-button {
@@ -546,18 +546,18 @@
                     <div class="gauge-value" id="temp-value"></div>
                     <canvas id="gauge_temp" width="200" height="200"></canvas>
                   </div>
-                  
+
                   <div style="text-align:center;">
                     <div class="gauge-value" id="hum-value"></div>
                     <canvas id="gauge_hum" width="200" height="200"></canvas>
                   </div>
-                  
+
                   <div style="text-align:center;">
                     <div class="gauge-value" id="press-value"></div>
                     <canvas id="gauge_press" width="200" height="200"></canvas>
                   </div>
-              
-              </div>              
+
+              </div>
 
       </div>
 
@@ -1059,40 +1059,44 @@
             updateDisplay();
           });
       </script>
-      
-      {% if combined_data|length > 0 %}
-    <script>
-    var currentTemp = {{ combined_data[-1]['temp']|round(1) }};
-    var currentHum = {{ combined_data[-1]['humidity']|round(1) }};
-    var currentPress = {{ combined_data[-1]['pressure']|round(2) }};
-    </script>
-    {% else %}
-    <script>
-    // Valeurs par défaut si aucune donnée n'est disponible
-    var currentTemp = 20.0;
-    var currentHum = 50.0;
-    var currentPress = 1010.0;
-    </script>
-    {% endif %}
+
+        {% if combined_data|length > 0 %}
+        <script>
+            // Récupération de la dernière mesure enregistrée en base pour le node sélectionné
+            var currentTemp = {{ combined_data[-1]['temp']|round(1) }};
+            var currentHum = {{ combined_data[-1]['humidity']|round(1) }};
+            var currentPress = {{ combined_data[-1]['pressure']|round(2) }};
+
+            // On peut garder les min/max calculés sur la plage horaire pour le style du gauge
+            var minValTemp = {{ min_temp if min_temp else 10 }};
+            var maxValTemp = {{ max_temp if max_temp else 35 }};
+
+            var minValHum = {{ min_hum if min_hum else 20 }};
+            var maxValHum = {{ max_hum if max_hum else 80 }};
+
+            var minValPress = {{ min_press if min_press else 900 }};
+            var maxValPress = {{ max_press if max_press else 1100 }};
+        </script>
+        {% else %}
+        <script>
+            // Valeurs par défaut si aucune donnée n'est disponible
+            var currentTemp = 20.0;
+            var currentHum = 50.0;
+            var currentPress = 1010.0;
+
+            var minValTemp = 10;
+            var maxValTemp = 35;
+            var minValHum = 20;
+            var maxValHum = 80;
+            var minValPress = 900;
+            var maxValPress = 1100;
+        </script>
+        {% endif %}
+
       <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
       <script>
-        // var currentTemp = {{ last_temp }}; 
-        // var minValTemp = {{ min_temp }}; 
-        // var maxValTemp = {{ max_temp }};
-        
-        var currentTemp = {{ avg_temp|round(1) if avg_temp else 22.0 }}; 
-        var minValTemp = {{ min_temp if min_temp else 10 }}; 
-        var maxValTemp = {{ max_temp if max_temp else 35 }}; 
-        
-        var currentHum = {{ avg_hum|round(1) if avg_hum else 50.0 }};
-        var minValHum = {{ min_hum if min_hum else 20 }};
-        var maxValHum = {{ max_hum if max_hum else 80 }};
-        
-        var currentPress = {{ avg_press|round(2) if avg_press else 1000 }};
-        var minValPress = {{ min_press if min_press else 900 }};
-        var maxValPress = {{ max_press if max_press else 1100 }};
-        
-        
+
+
         function getGaugeOptions(type, darkMode) {
   let staticZones;
   let staticLabels;
@@ -1102,11 +1106,11 @@
   if (type === 'temp') {
 
     staticZones = [
-      { strokeStyle: "#F03E3E", min: 10,    max: 13 },  
-      { strokeStyle: "#FFDD00", min: 13,   max: 17 },  
-      { strokeStyle: "#30B32D", min: 17,   max: 23 },  
-      { strokeStyle: "#FFDD00", min: 23,   max: 30 },  
-      { strokeStyle: "#F03E3E", min: 30,   max: 35 }   
+      { strokeStyle: "#FF7F7F", min: 10,    max: 13 },
+      { strokeStyle: "#FFD966", min: 13,   max: 17 },
+      { strokeStyle: "#7FFF7F", min: 17,   max: 23 },
+      { strokeStyle: "#FFD966", min: 23,   max: 30 },
+      { strokeStyle: "#FF7F7F", min: 30,   max: 35 }
     ];
     staticLabels = {
       font: "12px sans-serif",
@@ -1116,11 +1120,11 @@
     };
   } else if (type === 'hum') {
     staticZones = [
-      { strokeStyle: "#F03E3E", min: 20,   max: 25 },
-      { strokeStyle: "#FFDD00", min: 25,  max: 40 },
-      { strokeStyle: "#30B32D", min: 40,  max: 60 },
-      { strokeStyle: "#FFDD00", min: 60,  max: 80 },
-      { strokeStyle: "#F03E3E", min: 80,  max: 85 }
+      { strokeStyle: "#FF7F7F", min: 20,   max: 25 },
+      { strokeStyle: "#FFD966", min: 25,  max: 40 },
+      { strokeStyle: "#7FFF7F", min: 40,  max: 60 },
+      { strokeStyle: "#FFD966", min: 60,  max: 80 },
+      { strokeStyle: "#FF7F7F", min: 80,  max: 85 }
     ];
     staticLabels = {
       font: "12px sans-serif",
@@ -1130,11 +1134,11 @@
     };
   } else if (type === 'press') {
     staticZones = [
-      { strokeStyle: "#F03E3E", min: 955, max: 960 },
-      { strokeStyle: "#FFDD00", min: 960, max: 990 },
-      { strokeStyle: "#30B32D", min: 990, max: 1030 },
-      { strokeStyle: "#FFDD00", min: 1030, max: 1070 },
-      { strokeStyle: "#F03E3E", min: 1070, max: 1075 }
+      { strokeStyle: "#FF7F7F", min: 955, max: 960 },
+      { strokeStyle: "#FFD966", min: 960, max: 990 },
+      { strokeStyle: "#7FFF7F", min: 990, max: 1030 },
+      { strokeStyle: "#FFD966", min: 1030, max: 1070 },
+      { strokeStyle: "#FF7F7F", min: 1070, max: 1075 }
     ];
     staticLabels = {
       font: "12px sans-serif",
@@ -1145,7 +1149,7 @@
   }
 
   return {
-    angle: -0.6,          
+    angle: -0.6,
     lineWidth: 0.2,
     radiusScale: 0.8,
     pointer: {
@@ -1193,6 +1197,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 </script>
-      
+
     </body>
 </html>

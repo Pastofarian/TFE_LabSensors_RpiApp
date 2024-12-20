@@ -1,4 +1,4 @@
-import RPi.GPIO as GPIO 
+import RPi.GPIO as GPIO
 import board
 import busio
 import adafruit_ssd1306
@@ -10,7 +10,7 @@ import sqlite3
 from ischedule import schedule, run_loop  # https://pypi.org/project/ischedule/
 import signal
 
-button_press = 1  # to follow the number of button presses
+button_press = 0  # to follow the number of button presses
                   # to scroll between pages
 
 # the OLED can display 4 lines
@@ -19,13 +19,13 @@ line2 = ""
 line3 = ""
 line4 = ""
 
-# sensor number 1 for page 1 and S for Space
-screen_pages = ["1", "3", "S"]
+# no hard-coded list of sensor pages, will be dynamic
+# previously was: screen_pages = ["1", "3", "S"]
 
 led_pin = 4   # blinking led
 button_pin = 22 # button (BCM 22, physic pin 15)
 
-GPIO.setmode(GPIO.BCM) # I use BCM
+GPIO.setmode(GPIO.BCM) # i use BCM
 GPIO.setup(led_pin, GPIO.OUT)
 GPIO.output(led_pin, GPIO.LOW)
 
@@ -58,11 +58,12 @@ def write_to_oled():
     image = Image.new("1", (oled.width, oled.height))
     draw = ImageDraw.Draw(image)
 
+    # if page is numeric, treat as sensor page
+    # if page is 'S', treat as disk space
+    # else show N/A
     if screen_pages[button_press].isnumeric():
-        # if the page matches a sensor number
         display_parts = get_database_records(screen_pages[button_press])
     else:
-        # (for flexibility) if the page corresponds to a function, for example "S" for disk space 
         if screen_pages[button_press] == "S":
             display_parts = get_disk_space()
         else:
@@ -147,7 +148,18 @@ GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 signal.signal(signal.SIGINT, handler)
 GPIO.add_event_detect(button_pin, GPIO.RISING, callback=button_callback)
 
-# update every 60 seconds
+# get sensor_ids dynamically from the db
+conn = sqlite3.connect('/var/www/rpi_app/rpi_app.db')
+curs = conn.cursor()
+curs.execute("SELECT DISTINCT sensor_id FROM temperatures ORDER BY sensor_id ASC")
+rows = curs.fetchall()
+conn.close()
+
+# create pages list based on all found sensor_ids + the stock page
+sensor_pages = [str(row[0]) for row in rows]
+screen_pages = sensor_pages + ["S"]
+
+# schedule the oled update every 60 seconds
 schedule(update_oled, interval=60.0)
 
 print("Prêt")
@@ -155,3 +167,4 @@ print("Prêt")
 write_to_oled()
 
 run_loop()
+
