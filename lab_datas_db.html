@@ -12,34 +12,36 @@
     <link rel="stylesheet" href="/assets/css/skeleton.css">
     <link rel="icon" type="image/png" href="/static/images/chart-1024.png">
 
-
     <style>
-        /* handle global body layout */
         body {
           font-family: 'Raleway', sans-serif;
           margin: 0;
           padding: 0;
-          /*overflow: hidden; /* prevents entire page scrolling */
         }
 
-        /* style dashboard title */
         .dashboard-title {
-            font-size: 3.5em;
-            font-weight: 700;
-            background: linear-gradient(to top, #0078d7, #ffffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-            margin: 0;
-            letter-spacing: 2px;
-            }
+        font-size: 3.5em;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin: 0;
+        letter-spacing: 2px;
+        }
+
+        body:not(.dark-mode) .dashboard-title {
+        color: #005BB5;
+        }
+
+        body.dark-mode .dashboard-title {
+        background: linear-gradient(to bottom, green, white);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        }
 
         .title-icon {
           font-size: 0.8em;
           margin-right: 10px;
         }
 
-        /* style top header */
         .top-header {
           position: fixed;
           top: 0;
@@ -56,7 +58,6 @@
           border-bottom: 1px solid #ddd;
         }
 
-        /* handle main layout */
         .layout-container {
           margin-top: 80px;
           height: calc(100vh - 80px);
@@ -81,7 +82,6 @@
           }
         }
 
-        /* columns styling */
         .left-column, .middle-column, .right-column {
           background-color: #fff;
           padding: 20px;
@@ -99,39 +99,6 @@
           font-weight: bold;
         }
 
-        .button-primary {
-          background-color: #0078d7;
-          color: white;
-          border: none;
-          padding: 10px 15px;
-          cursor: pointer;
-        }
-
-        /* node buttons */
-        .node-button, .node-button-selected {
-          display: inline-block;
-          padding: 6px 10px;
-          margin-right: 5px;
-          color: white;
-          text-decoration: none;
-          background-color: green;
-          border-radius: 4px;
-        }
-
-        .node-button-selected {
-          background-color: #0a5;
-          font-weight: bold;
-        }
-
-        .time-range-form label {
-          display: inline;
-          margin-right: 10px;
-        }
-
-        .time-range-form input[type="radio"] {
-          margin-right: 3px;
-        }
-
         table.u-full-width {
           margin-top: 20px;
           border-collapse: collapse;
@@ -144,24 +111,14 @@
           text-align: left;
         }
 
-        /* graphs area */
-        #graph_temp, #graph_humid, #graph_press {
-          margin-bottom: 20px;
-        }
-
-        /* interval button and dropdown */
-        .interval-btn {
-          background-color: green;
-          color: white;
+        .my-btn, .interval-btn, .switch-button, #start-button, .action-button, .dropdown-select {
+          font-size: 14px;
           cursor: pointer;
-          border: none;
           border-radius: 4px;
-          font-size: 16px;
-          margin-left: 10px;
-          position: relative;
+          transition: background-color 0.3s;
+          border: 1px solid #0078d7;
         }
 
-        /* handle interval dropdown menu */
         .interval-dropdown {
           position: absolute;
           top: 60px;
@@ -188,36 +145,6 @@
           gap: 10px;
         }
 
-        .my-btn, .interval-btn {
-            background: linear-gradient(to top, #0078d7, #ffffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-color: transparent;
-            border: 1px solid #0078d7;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .my-btn:hover, .interval-btn:hover {
-            background: linear-gradient(to top, #005fa3, #ffffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .my-btn.clicked {
-            background: linear-gradient(to top, #00a300, #ffffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        table.u-full-width, table.u-full-width th, table.u-full-width td {
-          background-color: #fff;
-          color: #000;
-        }
-
-        /* handle dark mode colors */
         body.dark-mode table.u-full-width,
         body.dark-mode table.u-full-width th,
         body.dark-mode table.u-full-width td {
@@ -247,11 +174,6 @@
           border-color: #555;
         }
 
-        body.dark-mode .node-button, body.dark-mode .node-button-selected {
-          background: green;
-          color: white;
-        }
-
         body.dark-mode .header-controls .my-btn,
         body.dark-mode .header-controls .interval-btn {
           background-color: #444;
@@ -267,7 +189,14 @@
           background: #333;
         }
 
-        /* style digital clock and date display */
+        body.dark-mode .switch-button,
+        body.dark-mode #start-button,
+        body.dark-mode .action-button,
+        body.dark-mode .dropdown-select {
+          background: linear-gradient(to bottom, white, green);
+          color: black !important;
+        }
+
         #digital-clock {
           margin-bottom: 30px;
           text-align: left;
@@ -276,21 +205,18 @@
           width: 70%;
         }
 
-        /* handle font color for clock */
-        .font-color {
-          background: green;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          -webkit-background-clip: text;
-        }
+        body:not(.dark-mode) .font-color {
+            color: black !important;
+            background: none !important;
+            -webkit-text-fill-color: initial !important;
+            }
 
-        /* dark mode font color gradient */
-        body.dark-mode .font-color {
-          background: linear-gradient(to bottom, white, green);
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          -webkit-background-clip: text;
-        }
+            body.dark-mode .font-color {
+            background: linear-gradient(to bottom, white, green);
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            -webkit-background-clip: text;
+            }
 
         .timeDiv {
           margin-bottom: 10px;
@@ -317,7 +243,6 @@
           font-size: 3rem !important;
         }
 
-        /* style chrono-timer display and buttons */
         #chrono-timer {
           margin-bottom: 20px;
           text-align: center;
@@ -328,36 +253,6 @@
           font-weight: bold;
         }
 
-        .switch-button {
-          font-size: 1.5rem;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          color: white;
-          background: green;
-        }
-
-        body.dark-mode .switch-button {
-          background: linear-gradient(to bottom, white, green);
-        }
-
-        #start-button {
-          font-size: 1.5rem;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          color: white;
-          background: green;
-        }
-
-        body.dark-mode #start-button {
-          background: linear-gradient(to bottom, white, green);
-        }
-
-        #timer-input {
-          display: none;
-        }
-
         #gauges-container {
           display: flex;
           justify-content: space-between;
@@ -366,56 +261,125 @@
         }
 
         #gauges-container canvas {
-            border: none;
-            background: transparent;
-            box-shadow: none;
-        }
-        .action-button {
-        font-size: 1.5rem;
-        border: none;
-        padding: 5px 15px;
-        border-radius: 4px;
-        cursor: pointer;
-        color: white;
-        background: green;
-        }
-        body.dark-mode .action-button {
-        background: linear-gradient(to bottom, white, green);
-        }
-
-        .dropdown-select {
-            font-size: 2rem;
-            font-weight: bold;
-            color: black;
-            background: green;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            text-align: center;
-            text-transform: uppercase;
-        }
-        body.dark-mode .dropdown-select {
-        background: linear-gradient(to bottom, white, green);
-        color: black !important;
+          border: none;
+          background: transparent;
+          box-shadow: none;
         }
 
         .gauge-container {
-            text-align: center;
-            width: 300px;
-            margin: 0 auto;
-            height: 300px;
-            padding: 20px
+          text-align: center;
+          width: 300px;
+          margin: 0 auto;
+          height: 300px;
+          padding: 20px;
         }
 
         .gauge-value {
-            font-size: 2em;
-            font-weight: bold;
+          font-size: 2em;
+          font-weight: bold;
         }
-    </style>
+
+        .dropdown-select {
+          font-size: 2rem;
+          font-weight: bold;
+          color: black;
+          background: green;
+          border: none;
+          border-radius: 4px;
+          padding: 5px 10px;
+          cursor: pointer;
+          text-align: center;
+          text-transform: uppercase;
+        }
+
+        .action-button {
+          font-size: 1.5rem;
+          border: none;
+          padding: 5px 15px;
+          border-radius: 4px;
+          cursor: pointer;
+          color: white;
+          background: green;
+        }
+
+        #datetimepicker1, #datetimepicker2 {
+          font-size: 1.2em !important;
+        }
+        body.dark-mode #datetimepicker1,
+        body.dark-mode #datetimepicker2 {
+          font-size: 1.2em !important;
+        }
+
+        body:not(.dark-mode) .top-header {
+          border-bottom: 1px solid #005BB5 !important;
+        }
+
+        body:not(.dark-mode) #time,
+        body:not(.dark-mode) #sec,
+        body:not(.dark-mode) #med,
+        body:not(.dark-mode) #full-date,
+        body:not(.dark-mode) .dayDiv span,
+        body:not(.dark-mode) #chrono-timer-display {
+          color: black !important;
+          background: none !important;
+        }
+
+        body:not(.dark-mode) .header-controls .my-btn,
+        body:not(.dark-mode) .header-controls .interval-btn,
+        body:not(.dark-mode) .switch-button,
+        body:not(.dark-mode) #start-button,
+        body:not(.dark-mode) .action-button,
+        body:not(.dark-mode) .dropdown-select {
+          color: black !important;
+          background-color: rgba(0,91,181,0.1) !important; 
+          border: 1px solid #005BB5 !important;
+        }
+
+        body:not(.dark-mode) h2,
+        body:not(.dark-mode) h3 {
+          color: black !important;
+        }
+
+        body:not(.dark-mode) table thead {
+          color: #005BB5 !important;
+        }
+        body:not(.dark-mode) table thead th {
+          border-right: 1px solid #005BB5 !important;
+        }
+
+        body:not(.dark-mode) tbody tr td[style*="border-right:1px solid green;"] {
+          border-right:1px solid #005BB5 !important;
+        }
+
+        body:not(.dark-mode) #graph_temp,
+        body:not(.dark-mode) #graph_humid,
+        body:not(.dark-mode) #graph_press {
+          --chart-color: #005BB5;
+        }
+        body:not(.dark-mode) #digital-clock,
+        body:not(.dark-mode) #chrono-timer-display {
+        color: black !important;
+        }
+        .left-column .dropdown-select,
+        .left-column .action-button {
+        border: 1px solid #0078d7 !important;
+        background-color: rgba(0, 91, 181, 0.1) !important; /* Couleur de fond translucide */
+        }
+        body.dark-mode .gauge-container .gauge-value {
+        color: white !important;
+        }
+
+        body.dark-mode canvas {
+        border: none;
+        background: transparent;
+        }
+
+        body.dark-mode .gauge-container .static-label {
+        color: white !important;
+        }
+
+        </style>
+
   </head>
   <body>
     <!-- render top header with controls -->
@@ -477,7 +441,7 @@
                 <button id="start-button" class="switch-button" style="flex:1;">Start</button>
                 <button id="reset-button" class="switch-button" style="flex:1;">Reset</button>
               </div>
-              
+
             </div>
           </div>
           <!-- display cellule links and forms -->
@@ -618,11 +582,11 @@
     </script>
    <script>
     jQuery(document).ready(function() {
-      // initialiser les datetimepickers
+        // handle datetime picker
       jQuery('#datetimepicker1').datetimepicker({ format:'Y-m-d H:i:s' });
       jQuery('#datetimepicker2').datetimepicker({ format:'Y-m-d H:i:s' });
-  
-      // quand on change la cellule ou la plage horaire
+
+        // handle node and range selection
       jQuery('#node-select, #range-select').change(function() {
         const node = jQuery('#node-select').val();
         const range = jQuery('#range-select').val();
@@ -637,20 +601,18 @@
 
         jQuery("#data_selection").submit();
         });
-  
-      // lors de la soumission par "Valider" (dates personnalisées),
-      // on enregistre simplement le timezone
+
+      // handle form submission
       jQuery("#data_selection").submit(function(event) {
         const timezone = jstz.determine();
         jQuery(".timezone").val(timezone.name());
-        // on ne modifie pas from/to, on les soumet telles quelles
       });
-  
-      // sélectionner la plage horaire actuelle dans le select
+
+      // set current node and range
       const currentRange = "{{ range_time }}";
       jQuery("#range-select").val(currentRange);
     });
-  </script>  
+  </script>
 
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
@@ -695,85 +657,63 @@
             }
         };
       }
-      function createTempChart() {
-          // draw temperature chart
-          var data = new google.visualization.DataTable();
-          data.addColumn('datetime', 'Heure');
-          data.addColumn('number', 'Température');
-          data.addRows([
-            {% for row in temp %}
-            [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
-            {% endfor %}
-          ]);
-          var options = getChartOptions('Température', 'Température (°C)', darkMode);
-          // use area chart for temperature
-          var chart = new google.visualization.AreaChart(document.getElementById('graph_temp'));
-          chart.draw(data, options);
-        }
 
-        function createHumChart() {
-          // draw humidity chart
-          var data = new google.visualization.DataTable();
-          data.addColumn('datetime', 'Heure');
-          data.addColumn('number', 'Humidité');
-          data.addRows([
-            {% for row in hum %}
-            [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
-            {% endfor %}
-          ]);
-          var options = getChartOptions('Humidité', 'Humidité (%)', darkMode);
-          // use area chart for humidity
-          var chart = new google.visualization.AreaChart(document.getElementById('graph_humid'));
-          chart.draw(data, options);
+      function getSeriesColor(darkMode) {
+        return darkMode ? '#4caf50' : '#005BB5';
         }
-
         function createTempChart() {
-          // create temperature chart data table
-          var data = new google.visualization.DataTable();
-          data.addColumn('datetime', 'Heure');
-          data.addColumn('number', 'Température');
-          data.addRows([
-            {% for row in temp %}
-            [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
-            {% endfor %}
-          ]);
-          // set options and draw temperature chart
-          var options = getChartOptions('Température', 'Température (°C)', darkMode);
-          var chart = new google.visualization.AreaChart(document.getElementById('graph_temp'));
-          chart.draw(data, options);
-        }
+    var data = new google.visualization.DataTable();
+    data.addColumn('datetime', 'Heure');
+    data.addColumn('number', 'Température');
+    data.addRows([
+        {% for row in temp %}
+        [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
+        {% endfor %}
+    ]);
+    var options = getChartOptions('Température', 'Température (°C)', darkMode);
+    // Ajouter la configuration des séries
+    options.series = {
+        0: { color: getSeriesColor(darkMode), lineWidth: 2, areaOpacity: 0.2 }
+    };
+    var chart = new google.visualization.AreaChart(document.getElementById('graph_temp'));
+    chart.draw(data, options);
+}
 
-        function createHumChart() {
-          // create humidity chart data table
-          var data = new google.visualization.DataTable();
-          data.addColumn('datetime', 'Heure');
-          data.addColumn('number', 'Humidité');
-          data.addRows([
-            {% for row in hum %}
-            [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
-            {% endfor %}
-          ]);
-          // set options and draw humidity chart
-          var options = getChartOptions('Humidité', 'Humidité (%)', darkMode);
-          var chart = new google.visualization.AreaChart(document.getElementById('graph_humid'));
-          chart.draw(data, options);
-        }
+function createHumChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('datetime', 'Heure');
+    data.addColumn('number', 'Humidité');
+    data.addRows([
+        {% for row in hum %}
+        [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
+        {% endfor %}
+    ]);
+    var options = getChartOptions('Humidité', 'Humidité (%)', darkMode);
+    // Ajouter la configuration des séries
+    options.series = {
+        0: { color: getSeriesColor(darkMode), lineWidth: 2, areaOpacity: 0.2 }
+    };
+    var chart = new google.visualization.AreaChart(document.getElementById('graph_humid'));
+    chart.draw(data, options);
+}
 
-        function createPressChart() {
-          // create pressure chart data table
-          var data = new google.visualization.DataTable();
-          data.addColumn('datetime', 'Heure');
-          data.addColumn('number', 'Pression');
-          data.addRows([
-            {% for row in press %}
-            [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
-            {% endfor %}
-          ]);
-          // set options and draw pressure chart
-          var options = getChartOptions('Pression', 'Pression (hPa)', darkMode);
-          var chart = new google.visualization.AreaChart(document.getElementById('graph_press'));
-          chart.draw(data, options);
-        }
+function createPressChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('datetime', 'Heure');
+    data.addColumn('number', 'Pression');
+    data.addRows([
+        {% for row in press %}
+        [new Date({{ row[0][6:10] }}, {{ row[0][3:5]|int - 1 }}, {{ row[0][0:2] }}, {{ row[0][11:13] }}, {{ row[0][14:16] }}), {{ row[2]|float }}],
+        {% endfor %}
+    ]);
+    var options = getChartOptions('Pression', 'Pression (hPa)', darkMode);
+    // Ajouter la configuration des séries
+    options.series = {
+        0: { color: getSeriesColor(darkMode), lineWidth: 2, areaOpacity: 0.2 }
+    };
+    var chart = new google.visualization.AreaChart(document.getElementById('graph_press'));
+    chart.draw(data, options);
+}
 
       </script>
       <script>
@@ -1087,7 +1027,7 @@
         </script>
         {% endif %}
 
-      <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script> 
+      <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
       <script>
 
 
@@ -1096,6 +1036,7 @@
   let staticLabels;
 
   let labelColor = darkMode ? "#ffffff" : "#000000";
+  let pointerColor = darkMode ? "#ffffff" : "#000000";
 
   if (type === 'temp') {
     // temperature gauge options
@@ -1152,7 +1093,7 @@
     pointer: {
       length: 0.6,
       strokeWidth: 0.035,
-      color: '#FFFFFF'
+      color: pointerColor,
     },
     limitMax: false,
     limitMin: false,
@@ -1171,6 +1112,7 @@ function initGauges() {
   gaugeTemp.animationSpeed = 32;
   gaugeTemp.set(currentTemp);
   document.getElementById("temp-value").textContent = currentTemp.toFixed(1) + " °C";
+  //gaugeTemp.setOptions({ pointer: { color: '#000000'}});
 
   // initialize humidity gauge
   var humOpts = getGaugeOptions('hum', darkMode);
@@ -1180,6 +1122,7 @@ function initGauges() {
   gaugeHum.animationSpeed = 32;
   gaugeHum.set(currentHum);
   document.getElementById("hum-value").textContent = currentHum.toFixed(1) + " %";
+  //gaugeHum.setOptions({ pointer: { color: '#000000'}});
 
   // initialize pressure gauge
   var pressOpts = getGaugeOptions('press', darkMode);
@@ -1189,6 +1132,7 @@ function initGauges() {
   gaugePress.animationSpeed = 32;
   gaugePress.set(currentPress);
   document.getElementById("press-value").textContent = currentPress.toFixed(2) + " hPa";
+  //gaugePress.setOptions({ pointer: { color: '#000000'}});
 }
 
 // initialize gauges on page load
