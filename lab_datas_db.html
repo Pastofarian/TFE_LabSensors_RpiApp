@@ -378,6 +378,38 @@
         color: white !important;
         }
 
+@media screen and (max-width: 768px) {
+  .top-header {
+    flex-wrap: wrap; 
+  }
+
+  .left-column {
+    padding-top: 300px !important;
+  }
+
+  .header-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-controls .my-btn,
+  .header-controls .interval-btn {
+    width: 100%;
+    margin: 0;       
+  }
+
+  .my-btn, .interval-btn {
+    font-size: 1.1em;
+  }
+  
+  .layout-container {
+    margin-top: 120px !important;  
+    height: auto !important;       
+    overflow: visible !important;  
+  }
+}
         </style>
 
   </head>
