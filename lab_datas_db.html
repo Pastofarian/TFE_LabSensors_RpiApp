@@ -331,7 +331,7 @@
         body:not(.dark-mode) .action-button,
         body:not(.dark-mode) .dropdown-select {
           color: black !important;
-          background-color: rgba(0,91,181,0.1) !important; 
+          background-color: rgba(0,91,181,0.1) !important;
           border: 1px solid #005BB5 !important;
         }
 
@@ -363,7 +363,7 @@
         .left-column .dropdown-select,
         .left-column .action-button {
         border: 1px solid #0078d7 !important;
-        background-color: rgba(0, 91, 181, 0.1) !important; /* Couleur de fond translucide */
+        background-color: rgba(0, 91, 181, 0.1) !important; /* light blue for background */
         }
         body.dark-mode .gauge-container .gauge-value {
         color: white !important;
@@ -445,7 +445,6 @@
             </div>
           </div>
           <!-- display cellule links and forms -->
-            <!--<h2 class="selection-title" style="text-align:center; font-size:2rem; margin-bottom:20px;">Choix de la cellule {{ node }} et plage horaire</h2>-->
             <div style="display:flex; gap:20px; width:100%; margin-bottom:20px;">
                 <form id="data_selection" action="/lab_datas_db" method="GET" style="flex:1; display:flex; flex-direction:column; gap:10px;">
 
@@ -463,7 +462,7 @@
                     </select>
                 </div>
 
-                <!-- Inputs de datetime et timezone -->
+                <!-- Inputs datetime and timezone -->
                 <label for="from">Depuis le</label>
                 <input class="u-full-width" id="datetimepicker1" type="text" value="{{ start_date }}" name="from" style="color:black;"/>
 
@@ -582,35 +581,54 @@
     </script>
    <script>
     jQuery(document).ready(function() {
-        // handle datetime picker
-      jQuery('#datetimepicker1').datetimepicker({ format:'Y-m-d H:i:s' });
-      jQuery('#datetimepicker2').datetimepicker({ format:'Y-m-d H:i:s' });
 
-        // handle node and range selection
-      jQuery('#node-select, #range-select').change(function() {
-        const node = jQuery('#node-select').val();
+      // initialize datetimepicker
+      jQuery('#datetimepicker1').datetimepicker({
+        format: 'd-m-Y H:i:s'
+      });
+      jQuery('#datetimepicker2').datetimepicker({
+        format: 'd-m-Y H:i:s'
+      });
+
+      // format date to DMY
+      function formatDateDMY(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+      }
+
+      // handle node selection
+      jQuery('#node-select').change(function() {
+        jQuery("#data_selection").submit();
+      });
+
+      // handle range selection
+      jQuery('#range-select').change(function() {
         const range = jQuery('#range-select').val();
-
         const now = new Date();
-        const fromDate = new Date(now.getTime() - range * 3600 * 1000);
-        const toDateStr = now.toISOString().slice(0, 19).replace("T", " ");
-        const fromDateStr = fromDate.toISOString().slice(0, 19).replace("T", " ");
+        const fromDate = new Date(now.getTime() - (range * 3600 * 1000));
 
-        jQuery("#datetimepicker1").val(fromDateStr);
-        jQuery("#datetimepicker2").val(toDateStr);
+        // update datetimepicker values
+        jQuery("#datetimepicker1").val(formatDateDMY(fromDate));
+        jQuery("#datetimepicker2").val(formatDateDMY(now));
 
         jQuery("#data_selection").submit();
-        });
+      });
 
-      // handle form submission
-      jQuery("#data_selection").submit(function(event) {
+      // handle datetimepicker submit
+      jQuery("#data_selection").submit(function() {
         const timezone = jstz.determine();
         jQuery(".timezone").val(timezone.name());
       });
 
-      // set current node and range
+      // set current range
       const currentRange = "{{ range_time }}";
       jQuery("#range-select").val(currentRange);
+
     });
   </script>
 
@@ -671,7 +689,7 @@
         {% endfor %}
     ]);
     var options = getChartOptions('Température', 'Température (°C)', darkMode);
-    // Ajouter la configuration des séries
+    
     options.series = {
         0: { color: getSeriesColor(darkMode), lineWidth: 2, areaOpacity: 0.2 }
     };
@@ -689,7 +707,7 @@ function createHumChart() {
         {% endfor %}
     ]);
     var options = getChartOptions('Humidité', 'Humidité (%)', darkMode);
-    // Ajouter la configuration des séries
+    
     options.series = {
         0: { color: getSeriesColor(darkMode), lineWidth: 2, areaOpacity: 0.2 }
     };
@@ -707,7 +725,7 @@ function createPressChart() {
         {% endfor %}
     ]);
     var options = getChartOptions('Pression', 'Pression (hPa)', darkMode);
-    // Ajouter la configuration des séries
+    
     options.series = {
         0: { color: getSeriesColor(darkMode), lineWidth: 2, areaOpacity: 0.2 }
     };
@@ -798,6 +816,7 @@ function createPressChart() {
             createTempChart();
             createHumChart();
             createPressChart();
+            initGauges();
           }
 
           // handle theme toggle
@@ -1112,7 +1131,6 @@ function initGauges() {
   gaugeTemp.animationSpeed = 32;
   gaugeTemp.set(currentTemp);
   document.getElementById("temp-value").textContent = currentTemp.toFixed(1) + " °C";
-  //gaugeTemp.setOptions({ pointer: { color: '#000000'}});
 
   // initialize humidity gauge
   var humOpts = getGaugeOptions('hum', darkMode);
@@ -1122,7 +1140,6 @@ function initGauges() {
   gaugeHum.animationSpeed = 32;
   gaugeHum.set(currentHum);
   document.getElementById("hum-value").textContent = currentHum.toFixed(1) + " %";
-  //gaugeHum.setOptions({ pointer: { color: '#000000'}});
 
   // initialize pressure gauge
   var pressOpts = getGaugeOptions('press', darkMode);
@@ -1132,14 +1149,12 @@ function initGauges() {
   gaugePress.animationSpeed = 32;
   gaugePress.set(currentPress);
   document.getElementById("press-value").textContent = currentPress.toFixed(2) + " hPa";
-  //gaugePress.setOptions({ pointer: { color: '#000000'}});
 }
 
 // initialize gauges on page load
 document.addEventListener("DOMContentLoaded", function() {
   initGauges();
 });
-
 
 </script>
 

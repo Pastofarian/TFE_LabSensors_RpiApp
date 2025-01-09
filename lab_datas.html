@@ -1,32 +1,242 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- auto-refresh every 10s -->
     <meta http-equiv="refresh" content="10">
     <meta name="description" content="Lab conditions monitored by Raspberry Pi">
     <meta name="author" content="Christophe Aseglio">
-    <title>Conditions environnementales du laboratoire acoustique</title>
+    <title>Live - Conditions Climatiques</title>
 
-    <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+    <!-- google fonts + base css -->
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="/assets/css/normalize.css">
     <link rel="stylesheet" href="/assets/css/skeleton.css">
-    <link rel="icon" type="image/png" href="/assets/images/favicon.png">
-</head>
-<body>
-    <div class="container">
-        <div class="row" style="margin-top: 5%;">
-            <h2>Cellule {{ node }}</h2>
-            <h1>Température: {{ temp is none and 'N/A' or "{:0.0f}".format(temp) ~ '°C' }}</h1>
-            <h1>Humidité: {{ hum is none and 'N/A' or "{:0.0f}".format(hum) ~ '%' }}</h1>
-            <h1>Pression: {{ pres is none and 'N/A' or "{:0.0f}".format(pres) ~ ' pa' }}</h1>
-            <p>Cette page se rafraîchit toutes les 10 secondes</p>
-            <div style="margin-top: 20px;">
-                <a href="/lab_datas_db?node={{ node }}" style="position:relative; top:15px;">Historique des conditions climatiques</a>
-            </div>
-        </div>
+    <link rel="icon" type="image/png" href="/static/images/chart-1024.png">
+
+    <style>
+      body {
+        font-family: 'Raleway', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* top bar */
+      .top-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: #f8f8f8;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-sizing: border-box;
+        padding: 20px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .dashboard-title {
+        font-size: 3.5em;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin: 0;
+        letter-spacing: 2px;
+      }
+
+      .title-icon {
+        font-size: 0.8em;
+        margin-right: 10px;
+      }
+
+      .header-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .my-btn {
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        border: 1px solid #0078d7;
+        background-color: rgba(0,91,181,0.1);
+        color: black !important;
+      }
+
+      body.dark-mode .my-btn {
+        background-color: #444;
+        color: #fff !important;
+      }
+
+      /* main container */
+      .layout-container {
+        margin-top: 80px; /* place page under top bar */
+        min-height: calc(100vh - 80px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* vertical center */
+        align-items: center;     /* horizontal center */
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      /* info card (temp, hum, pres) */
+      .live-card {
+        background: #fff;
+        /* bigger size and padding */
+        width: 60%;
+        max-width: 800px;
+        padding: 60px 40px; 
+        border: 1px solid #ddd;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      body.dark-mode .live-card {
+        background: #1e1e1e;
+        border-color: #333;
+        color: #fff;
+      }
+
+      .live-title {
+        margin-top: 0;
+        font-weight: bold;
+        font-size: 8rem; /* bigger title */
+        margin-bottom: 30px;
+      }
+
+      .live-value {
+        font-size: 7rem; /* values in 7rem */
+        font-weight: 700;
+        margin: 20px 0;
+      }
+
+      .live-label {
+        font-size: 1.5rem;
+        margin-left: 5px;
+      }
+
+      /* global dark mode */
+      body.dark-mode {
+        background: #121212;
+        color: #fff;
+      }
+
+      body.dark-mode .top-header {
+        background: #1e1e1e;
+        border-bottom: 1px solid #333;
+      }
+
+      /* dark/light button */
+      #btn-mode {
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        border: 1px solid #0078d7;
+      }
+      body.dark-mode #btn-mode {
+        background: linear-gradient(to bottom, white, green);
+        color: black !important;
+      }
+
+      /* links */
+      a {
+        color: #005BB5;
+        text-decoration: none;
+      }
+      body.dark-mode a {
+        color: #4caf50;
+      }
+
+      /* 'see history' button */
+      .action-button {
+        font-size: 3rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        color: white;
+        background: green;
+        margin-top: 30px;
+        /* center text */
+        text-align: center;
+        display: inline-block; 
+        height: 50px;
+      }
+      body.dark-mode .action-button {
+        background: linear-gradient(to bottom, white, green);
+        color: black !important;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- top header -->
+    <div class="top-header">
+      <h1 class="dashboard-title">
+        <span class="title-icon">📊</span> Live - Laboratoire Acoustique
+      </h1>
+      <div class="header-controls">
+        <button class="my-btn" id="btn-mode">Dark/Light</button>
+      </div>
     </div>
-</body>
+
+    <!-- main content -->
+    <div class="layout-container">
+      <div class="live-card">
+        <h2 class="live-title">Cellule {{ node }}</h2>
+
+        <!-- temperature -->
+        <div class="live-value">
+          {{ temp is none and 'N/A' or "{:0.0f}".format(temp) }}
+          <span class="live-label">°C</span>
+        </div>
+        <!-- humidity -->
+        <div class="live-value">
+          {{ hum is none and 'N/A' or "{:0.0f}".format(hum) }}
+          <span class="live-label">%</span>
+        </div>
+        <!-- pressure -->
+        <div class="live-value">
+          {{ pres is none and 'N/A' or "{:0.0f}".format(pres) }}
+          <span class="live-label">Pa</span>
+        </div>
+
+        <p style="margin-top: 30px;">
+          Rafraîchissement automatique toutes les 10 secondes
+        </p>
+
+        <!-- 'see history' button -->
+        <button class="action-button" 
+                onclick="window.location.href='/lab_datas_db?node={{ node }}'">
+          Voir l'historique
+        </button>
+      </div>
+    </div>
+
+    <!-- jquery -->
+    <script src="//code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+      // handle dark mode via localstorage
+      let darkMode = (localStorage.getItem('darkMode') === 'true');
+      if (darkMode) {
+        document.body.classList.add('dark-mode');
+      }
+
+      document.getElementById('btn-mode').addEventListener('click', function() {
+        darkMode = !darkMode;
+        if (darkMode) {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+        }
+        localStorage.setItem('darkMode', darkMode);
+      });
+    </script>
+  </body>
 </html>
 
