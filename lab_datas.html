@@ -237,6 +237,28 @@
         localStorage.setItem('darkMode', darkMode);
       });
     </script>
+    <script>
+        // auto-refresh sensor data every 10s
+        function updateLiveData() {
+          // call new endpoint
+          fetch("/live_data?node=1")
+            .then(resp => resp.json())
+            .then(json => {
+              // update dom with direct sensor readings
+              document.getElementById("tempValue").innerText = json.temp ? json.temp.toFixed(1) + " °C" : "N/A";
+              document.getElementById("humValue").innerText = json.hum ? json.hum.toFixed(1) + " %" : "N/A";
+              document.getElementById("presValue").innerText = json.pres ? json.pres.toFixed(1) + " Pa" : "N/A";
+            })
+            .catch(err => console.log("error fetching live data:", err));
+        }
+      
+        // set interval for direct sensor call
+        setInterval(updateLiveData, 10000);
+      
+        // call once on load
+        updateLiveData();
+      </script>
+      
   </body>
 </html>
 

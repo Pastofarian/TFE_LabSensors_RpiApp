@@ -315,6 +315,33 @@ def check_date(d):
         return True
     except (ValueError, TypeError):
         return False
+    
+@app.route("/live_data", methods=["GET"])
+def live_data():
+    # read sensor without storing in db
+    node = request.args.get('node', '1')
+    if node == '1':
+        try:
+            data = bme280.sample(bus, address, calibration_params)
+            temperature = data.temperature
+            humidity = data.humidity
+            pressure = data.pressure
+        except Exception:
+            temperature = None
+            humidity = None
+            pressure = None
+    else:
+        # if other node, handle if needed or just return none
+        temperature = None
+        humidity = None
+        pressure = None
+
+    # return simple json
+    return jsonify({
+        "temp": temperature,
+        "hum": humidity,
+        "pres": pressure
+    })
 
 if __name__ == "__main__":
     # run the flask app on specified host and port
