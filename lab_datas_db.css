@@ -1,0 +1,479 @@
+body {
+  font-family: 'Raleway', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-title {
+  font-size: 3.5em;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+body:not(.dark-mode) .dashboard-title {
+  color: #005BB5;
+}
+
+body.dark-mode .dashboard-title {
+  background: linear-gradient(to bottom, green, white);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.title-icon {
+  font-size: 0.8em;
+  margin-right: 10px;
+}
+
+.top-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #f8f8f8;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.layout-container {
+  margin-top: 80px;
+  height: calc(100vh - 80px);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+@media screen and (max-width: 768px) {
+  .layout-container {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+
+  .right-column {
+    max-height: auto;
+    overflow-y: visible;
+  }
+}
+
+.left-column,
+.middle-column,
+.right-column {
+  background-color: #fff;
+  padding: 20px;
+  border: 1px solid #ddd;
+}
+
+.right-column {
+  overflow-y: auto;
+  max-height: calc(100vh - 40px);
+  box-sizing: border-box;
+}
+
+h2,
+h1 {
+  margin-top: 0;
+  font-weight: bold;
+}
+
+table.u-full-width {
+  margin-top: 20px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table.u-full-width th,
+table.u-full-width td {
+  border-bottom: 1px solid #ddd;
+  padding: 5px;
+  text-align: left;
+}
+
+.my-btn,
+.interval-btn,
+.switch-button,
+#start-button,
+.action-button,
+.dropdown-select {
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  border: 1px solid #0078d7;
+}
+
+.interval-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  display: none;
+}
+
+.interval-dropdown div {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.interval-dropdown div:hover {
+  background: #eee;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+body.dark-mode table.u-full-width,
+body.dark-mode table.u-full-width th,
+body.dark-mode table.u-full-width td {
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+body.dark-mode {
+  background: #121212;
+  color: #fff;
+}
+
+body.dark-mode .top-header {
+  background: #1e1e1e;
+  border-bottom: 1px solid #333;
+}
+
+body.dark-mode .left-column,
+body.dark-mode .middle-column,
+body.dark-mode .right-column {
+  background: #1e1e1e;
+  border-color: #333;
+}
+
+body.dark-mode table.u-full-width th,
+body.dark-mode table.u-full-width td {
+  border-color: #555;
+}
+
+body.dark-mode .header-controls .my-btn,
+body.dark-mode .header-controls .interval-btn {
+  background-color: #444;
+  color: #fff;
+}
+
+body.dark-mode .interval-dropdown {
+  background: #1e1e1e;
+  border-color: #333;
+}
+
+body.dark-mode .interval-dropdown div:hover {
+  background: #333;
+}
+
+body.dark-mode .switch-button,
+body.dark-mode #start-button,
+body.dark-mode .action-button,
+body.dark-mode .dropdown-select {
+  background: linear-gradient(to bottom, white, green);
+  color: black !important;
+}
+
+#digital-clock {
+  margin-bottom: 30px;
+  text-align: center;
+  padding: 10px 0;
+  display: inline-block;
+  width: 70%;
+}
+
+body:not(.dark-mode) .font-color {
+  color: black !important;
+  background: none !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+body.dark-mode .font-color {
+  background: linear-gradient(to bottom, white, green);
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.timeDiv {
+  margin-bottom: 10px;
+}
+
+#time {
+  font-size: 6rem !important;
+  font-weight: bold;
+}
+
+#med {
+  position: absolute;
+  top: 20px;
+  right: 0;
+  font-size: 1.5rem;
+}
+
+.dayDiv span {
+  font-size: 2rem !important;
+  opacity: 0.8;
+}
+
+#full-date {
+  font-size: 3rem !important;
+}
+
+#chrono-timer {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#chrono-timer-display {
+  font-size: 6rem !important;
+  font-weight: bold;
+}
+
+#gauges-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+#gauges-container canvas {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.gauge-container {
+  text-align: center;
+  width: 300px;
+  margin: 0 auto;
+  height: 300px;
+  padding: 20px;
+}
+
+.gauge-value {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.dropdown-select {
+  font-size: 2rem;
+  font-weight: bold;
+  color: black;
+  background: green;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.action-button {
+  font-size: 1.5rem;
+  border: none;
+  padding: 5px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  background: green;
+}
+
+#datetimepicker1,
+#datetimepicker2 {
+  font-size: 1.2em !important;
+}
+
+body.dark-mode #datetimepicker1,
+body.dark-mode #datetimepicker2 {
+  font-size: 1.2em !important;
+}
+
+body:not(.dark-mode) .top-header {
+  border-bottom: 1px solid #005BB5 !important;
+}
+
+body:not(.dark-mode) #time,
+body:not(.dark-mode) #sec,
+body:not(.dark-mode) #med,
+body:not(.dark-mode) #full-date,
+body:not(.dark-mode) .dayDiv span,
+body:not(.dark-mode) #chrono-timer-display {
+  color: black !important;
+  background: none !important;
+}
+
+body:not(.dark-mode) .header-controls .my-btn,
+body:not(.dark-mode) .header-controls .interval-btn,
+body:not(.dark-mode) .switch-button,
+body:not(.dark-mode) #start-button,
+body:not(.dark-mode) .action-button,
+body:not(.dark-mode) .dropdown-select {
+  color: black !important;
+  background-color: rgba(0,91,181,0.1) !important;
+  border: 1px solid #005BB5 !important;
+}
+
+body:not(.dark-mode) h2,
+body:not(.dark-mode) h3 {
+  color: black !important;
+}
+
+body:not(.dark-mode) table thead {
+  color: #005BB5 !important;
+}
+
+body:not(.dark-mode) table thead th {
+  border-right: 1px solid #005BB5 !important;
+}
+
+body:not(.dark-mode) tbody tr td[style*="border-right:1px solid green;"] {
+  border-right: 1px solid #005BB5 !important;
+}
+
+body:not(.dark-mode) #graph_temp,
+body:not(.dark-mode) #graph_humid,
+body:not(.dark-mode) #graph_press {
+  --chart-color: #005BB5;
+}
+
+body:not(.dark-mode) #digital-clock,
+body:not(.dark-mode) #chrono-timer-display {
+  color: black !important;
+}
+
+.left-column .dropdown-select,
+.left-column .action-button {
+  border: 1px solid #0078d7 !important;
+  background-color: rgba(0, 91, 181, 0.1) !important; /* light blue for background */
+}
+
+body.dark-mode .gauge-container .gauge-value {
+  color: white !important;
+}
+
+body.dark-mode canvas {
+  border: none;
+  background: transparent;
+}
+
+body.dark-mode .gauge-container .static-label {
+  color: white !important;
+}
+
+@media screen and (max-width: 768px) {
+  .top-header {
+    flex-wrap: wrap;
+  }
+
+  .left-column {
+    padding-top: 300px !important;
+  }
+
+  .header-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-controls .my-btn,
+  .header-controls .interval-btn {
+    width: 100%;
+    margin: 0;
+  }
+
+  .my-btn,
+  .interval-btn {
+    font-size: 1.1em;
+  }
+
+  .layout-container {
+    margin-top: 120px !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+.flex-1 {
+    flex: 1;
+  }
+  
+  .clock-chrono-container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .digital-clock-center {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .chrono-center {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .chrono-button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+  }
+  
+  .data-selection-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .flex-gap-20 {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .gauges-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .validate-button {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 2rem;
+  }
+  
+  .table-container {
+    margin-top: 20px;
+    background: transparent;
+  }
