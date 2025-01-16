@@ -28,7 +28,7 @@
         <!-- plotly button -->
         <button class="my-btn" id="btn-plotly">Plotly</button>
         <!-- excel button -->
-        <button class="my-btn" id="btn-excel" 
+        <button class="my-btn" id="btn-excel"
           onclick="window.open('https://docs.google.com/spreadsheets/d/1yK2__60o5exO6lV_ohKmzkgoRAX_UMzi3gCJahJZ1Ds/edit?gid=0#gid=0', '_blank');">
           Excel
         </button>
@@ -86,10 +86,16 @@
         <div class="flex-gap-20">
           <form id="data_selection" action="/lab_datas_db" method="GET" class="data-selection-form">
             <div class="flex-gap-20">
-              <select id="node-select" name="node" class="dropdown-select flex-1">
-                {% for n in range(1,7) %}
-                  <option value="{{ n }}" {% if node == n|string %}selected{% endif %}>Cellule {{ n }}</option>
-                {% endfor %}
+                <select id="node-select" name="node" class="dropdown-select flex-1">
+                    <option value="1" {% if node == '1' %}selected{% endif %}>Cellule A</option>
+                    <option value="2" {% if node == '2' %}selected{% endif %}>Cellule B</option>
+                    <option value="3" {% if node == '3' %}selected{% endif %}>Cellule C</option>
+                    <option value="4" {% if node == '4' %}selected{% endif %}>Cellule D</option>
+                    <option value="5" {% if node == '5' %}selected{% endif %}>Cellule E</option>
+                    <option value="6" {% if node == '6' %}selected{% endif %}>Cellule F</option>
+                    <option value="7" {% if node == '7' %}selected{% endif %}>Cellule Alpha</option>
+                    <option value="8" {% if node == '8' %}selected{% endif %}>Hall</option>
+                  </select>                  
               </select>
               <select id="range-select" name="range_time" class="dropdown-select flex-1">
                 <option value="3" {% if range_time == '3' %}selected{% endif %}>3 heures</option>
@@ -101,16 +107,16 @@
 
             <!-- Inputs datetime and timezone -->
             <label for="from">Depuis le</label>
-            <input class="u-full-width" id="datetimepicker1" type="text" 
+            <input class="u-full-width" id="datetimepicker1" type="text"
                    value="{{ start_date }}" name="from" style="color:black;" />
 
             <label for="to">À</label>
-            <input class="u-full-width" id="datetimepicker2" type="text" 
+            <input class="u-full-width" id="datetimepicker2" type="text"
                    value="{{ end_date }}" name="to" style="color:black;" />
 
             <input type="hidden" class="timezone" name="timezone" value="{{ timezone }}">
 
-            <input class="action-button validate-button" 
+            <input class="action-button validate-button"
                    type="submit" value="Valider">
           </form>
         </div>
@@ -207,8 +213,8 @@
 
     <!-- load scripts -->
     <script src="//code.jquery.com/jquery-3.7.1.min.js"></script>
-    <link rel="stylesheet" 
-          type="text/css" 
+    <link rel="stylesheet"
+          type="text/css"
           href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.css"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.full.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.7/jstz.min.js"></script>
@@ -792,4 +798,3 @@
 
   </body>
 </html>
-

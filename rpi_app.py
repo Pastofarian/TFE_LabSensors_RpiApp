@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, abort, jsonify
+from flask import Flask, request, render_template, abort, jsonify, Response
 import datetime
 import sqlite3
 import arrow
@@ -79,13 +79,15 @@ def lab_datas_db():
         print(f"Error in lab_datas_db: {e}")
         abort(500)
 
-    # get range_time from query, default 24h if not provided
-    range_time = request.args.get('range_time', '24')
-    # if a valid integer, recalculate from/to dates
-    if range_time.isdigit():
+    range_time = request.args.get('range_time', '')
+    if (not from_date or not to_date) and range_time.isdigit():
         range_time_int = int(range_time)
         now = arrow.now(timezone)
         from_date = now.shift(hours=-range_time_int).format("YYYY-MM-DD HH:mm:ss")
+        to_date = now.format("YYYY-MM-DD HH:mm:ss")
+    elif not from_date or not to_date:
+        now = arrow.now(timezone)
+        from_date = now.shift(hours=-24).format("YYYY-MM-DD HH:mm:ss")
         to_date = now.format("YYYY-MM-DD HH:mm:ss")
 
     time_adjusted_temperatures = []
@@ -164,6 +166,32 @@ def lab_datas_db():
         avg_press=avg_press
     )
 
+@app.route("/lab_datas_db.js")
+def lab_datas_db_js():
+    try:
+        temperatures, humidities, pressures, timezone, from_date, to_date, node = get_datas()
+
+        range_time = request.args.get('range_time', '24')
+
+    except Exception as e:
+        print(f"Error in lab_datas_db_js: {e}")
+        abort(500)
+
+    return Response(
+        render_template(
+            "lab_datas_db_js.html",
+            temp=temperatures,
+            hum=humidities,
+            press=pressures,
+            node=node,
+            start_date=from_date,
+            end_date=to_date,
+            range_time=range_time,
+            timezone=timezone
+        ),
+        mimetype="application/javascript"
+    )
+
 def get_datas():
     # get parameters from query
     from_date = request.args.get('from')
@@ -186,13 +214,12 @@ def get_datas():
         print("range_time_form not valid")
 
     # if a valid range_time_int, recalculate from/to based on it
-    if range_time_int is not None:
+    if range_time_int is not None and not (from_date and to_date):
         arrow_time_to = arrow.now(timezone)
         arrow_time_from = arrow_time_to.shift(hours=-range_time_int)
         from_date_str = arrow_time_from.format("YYYY-MM-DD HH:mm:ss")
         to_date_str = arrow_time_to.format("YYYY-MM-DD HH:mm:ss")
-    else:
-        # if not valid range_time, parse from_date/to_date directly
+    elif from_date and to_date:
         try:
             arrow_from = arrow.get(from_date, "DD-MM-YYYY HH:mm:ss", tzinfo=timezone)
             arrow_to = arrow.get(to_date, "DD-MM-YYYY HH:mm:ss", tzinfo=timezone)
@@ -203,6 +230,12 @@ def get_datas():
 
         from_date_str = arrow_from.format("YYYY-MM-DD HH:mm:ss")
         to_date_str = arrow_to.format("YYYY-MM-DD HH:mm:ss")
+    else:
+        arrow_time_to = arrow.now(timezone)
+        arrow_time_from = arrow_time_to.shift(hours=-24)
+        from_date_str = arrow_time_from.format("YYYY-MM-DD HH:mm:ss")
+        to_date_str = arrow_time_to.format("YYYY-MM-DD HH:mm:ss")
+
 
     # connect to db and fetch data based on node and date range
     conn = sqlite3.connect('/var/www/rpi_app/rpi_app.db')
@@ -315,7 +348,7 @@ def check_date(d):
         return True
     except (ValueError, TypeError):
         return False
-    
+
 @app.route("/live_data", methods=["GET"])
 def live_data():
     # read sensor without storing in db
