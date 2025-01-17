@@ -56,17 +56,14 @@ def lab_datas():
         conn.close()
 
         if temp_data and hum_data and pres_data:
-            # if all three values found, assign them
             temperature = temp_data[2]
             humidity = hum_data[2]
             pressure = pres_data[2]
         else:
-            # no data found for this node
             temperature = None
             humidity = None
             pressure = None
 
-    # render template with the obtained values
     return render_template("lab_datas.html", temp=temperature, hum=humidity, pres=pressure, node=node)
 
 @app.route("/lab_datas_db", methods=['GET'])
@@ -166,31 +163,31 @@ def lab_datas_db():
         avg_press=avg_press
     )
 
-@app.route("/lab_datas_db.js")
-def lab_datas_db_js():
-    try:
-        temperatures, humidities, pressures, timezone, from_date, to_date, node = get_datas()
+# @app.route("/lab_datas_db.js")
+# def lab_datas_db_js():
+#     try:
+#         temperatures, humidities, pressures, timezone, from_date, to_date, node = get_datas()
 
-        range_time = request.args.get('range_time', '24')
+#         range_time = request.args.get('range_time', '24')
 
-    except Exception as e:
-        print(f"Error in lab_datas_db_js: {e}")
-        abort(500)
+#     except Exception as e:
+#         print(f"Error in lab_datas_db_js: {e}")
+#         abort(500)
 
-    return Response(
-        render_template(
-            "lab_datas_db_js.html",
-            temp=temperatures,
-            hum=humidities,
-            press=pressures,
-            node=node,
-            start_date=from_date,
-            end_date=to_date,
-            range_time=range_time,
-            timezone=timezone
-        ),
-        mimetype="application/javascript"
-    )
+#     return Response(
+#         render_template(
+#             "lab_datas_db_js.html",
+#             temp=temperatures,
+#             hum=humidities,
+#             press=pressures,
+#             node=node,
+#             start_date=from_date,
+#             end_date=to_date,
+#             range_time=range_time,
+#             timezone=timezone
+#         ),
+#         mimetype="application/javascript"
+#     )
 
 def get_datas():
     # get parameters from query

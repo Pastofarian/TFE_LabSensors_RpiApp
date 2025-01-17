@@ -91,7 +91,7 @@
         /* bigger size and padding */
         width: 60%;
         max-width: 800px;
-        padding: 60px 40px; 
+        padding: 60px 40px;
         border: 1px solid #ddd;
         text-align: center;
         margin-bottom: 20px;
@@ -164,7 +164,7 @@
         margin-top: 30px;
         /* center text */
         text-align: center;
-        display: inline-block; 
+        display: inline-block;
         height: 50px;
       }
       body.dark-mode .action-button {
@@ -172,15 +172,32 @@
         color: black !important;
       }
 
+      /* Mise à jour pour le select en mode dark */
+      .dropdown-select {
+        color: black;
+      }
+      body.dark-mode .dropdown-select {
+        color: white;
+        background-color: #444;
+      }
+      .dropdown-select option {
+        color: #000;
+        background-color: #fff;
+      }
+      body.dark-mode .dropdown-select option {
+        color: #fff;
+        background-color: #444;
+      }
+
       @media screen and (max-width: 768px) {
 
         .top-header {
-            flex-wrap: wrap;              
-            padding: 10px;             
+            flex-wrap: wrap;
+            padding: 10px;
         }
 
         .dashboard-title {
-            font-size: 2rem;             
+            font-size: 2rem;
         }
 
         .header-controls .my-btn {
@@ -189,23 +206,23 @@
         }
 
         .layout-container {
-            margin-top: 120px !important;  
-            padding: 10px;                
+            margin-top: 120px !important;
+            padding: 10px;
         }
 
         .live-card {
             width: 90% !important;
-            max-width: none;        
-            padding: 20px 15px;    
+            max-width: none;
+            padding: 20px 15px;
             margin-bottom: 20px;
         }
 
         .live-title {
-            font-size: 4rem !important; 
+            font-size: 4rem !important;
             margin-bottom: 20px;
         }
         .live-value {
-            font-size: 3rem !important; 
+            font-size: 3rem !important;
             margin: 15px 0;
         }
         .live-label {
@@ -214,11 +231,11 @@
 
         .action-button {
             font-size: 1.8rem;
-            height: auto;           
-            line-height: normal;    
+            height: auto;
+            line-height: normal;
             padding: 10px 20px;
         }
-        }
+      }
 
     </style>
   </head>
@@ -236,7 +253,36 @@
     <!-- main content -->
     <div class="layout-container">
       <div class="live-card">
-        <h2 class="live-title">Cellule {{ node }}</h2>
+        <form id="cellule_selection" action="/lab_datas" method="GET" class="cellule-selection-form">
+            <div class="flex-gap-20">
+              <select id="node-select" name="node" class="dropdown-select flex-1">
+                <option value="1" {% if node == '1' %}selected{% endif %}>Cellule A</option>
+                <option value="2" {% if node == '2' %}selected{% endif %}>Cellule B</option>
+                <option value="3" {% if node == '3' %}selected{% endif %}>Cellule C</option>
+                <option value="4" {% if node == '4' %}selected{% endif %}>Cellule D</option>
+                <option value="5" {% if node == '5' %}selected{% endif %}>Cellule E</option>
+                <option value="6" {% if node == '6' %}selected{% endif %}>Cellule F</option>
+                <option value="7" {% if node == '7' %}selected{% endif %}>Cellule Alpha</option>
+                <option value="8" {% if node == '8' %}selected{% endif %}>Hall</option>
+              </select>
+              <button type="submit" class="my-btn">Mettre à jour</button>
+            </div>
+          </form>
+          
+          {# Définition d’un petit "dictionnaire" Jinja pour mapper node -> nom complet #}
+          {% set node_labels = {
+            '1': 'Cellule A',
+            '2': 'Cellule B',
+            '3': 'Cellule C',
+            '4': 'Cellule D',
+            '5': 'Cellule E',
+            '6': 'Cellule F',
+            '7': 'Cellule Alpha',
+            '8': 'Hall'
+          } %}
+          <h2 class="live-title">
+            {{ node_labels[node] if node_labels[node] else 'Cellule ' ~ node }}
+          </h2>
 
         <!-- temperature -->
         <div class="live-value">
@@ -259,7 +305,7 @@
         </p>
 
         <!-- 'see history' button -->
-        <button class="action-button" 
+        <button class="action-button"
                 onclick="window.location.href='/lab_datas_db?node={{ node }}'">
           Voir l'historique
         </button>
@@ -269,7 +315,7 @@
     <!-- jquery -->
     <script src="//code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-      // handle dark mode via localstorage
+      // dark mode via localstorage
       let darkMode = (localStorage.getItem('darkMode') === 'true');
       if (darkMode) {
         document.body.classList.add('dark-mode');
@@ -299,14 +345,14 @@
             })
             .catch(err => console.log("error fetching live data:", err));
         }
-      
+
         // set interval for direct sensor call
         setInterval(updateLiveData, 10000);
-      
+
         // call once on load
         updateLiveData();
       </script>
-      
+
   </body>
 </html>
 

@@ -19,9 +19,6 @@ line2 = ""
 line3 = ""
 line4 = ""
 
-# no hard-coded list of sensor pages, will be dynamic
-# previously was: screen_pages = ["1", "3", "S"]
-
 led_pin = 4   # blinking led
 button_pin = 22 # button (BCM 22, physic pin 15)
 
@@ -167,4 +164,3 @@ print("Prêt")
 write_to_oled()
 
 run_loop()
-
