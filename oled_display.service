@@ -1,0 +1,14 @@
+[Unit]
+Description=OLED Display Service
+After=syslog.target
+
+[Service]
+ExecStart=/var/www/rpi_app/bin/python /var/www/rpi_app/oled_display.py
+WorkingDirectory=/var/www/rpi_app/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
