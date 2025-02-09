@@ -163,32 +163,6 @@ def lab_datas_db():
         avg_press=avg_press
     )
 
-# @app.route("/lab_datas_db.js")
-# def lab_datas_db_js():
-#     try:
-#         temperatures, humidities, pressures, timezone, from_date, to_date, node = get_datas()
-
-#         range_time = request.args.get('range_time', '24')
-
-#     except Exception as e:
-#         print(f"Error in lab_datas_db_js: {e}")
-#         abort(500)
-
-#     return Response(
-#         render_template(
-#             "lab_datas_db_js.html",
-#             temp=temperatures,
-#             hum=humidities,
-#             press=pressures,
-#             node=node,
-#             start_date=from_date,
-#             end_date=to_date,
-#             range_time=range_time,
-#             timezone=timezone
-#         ),
-#         mimetype="application/javascript"
-#     )
-
 def get_datas():
     # get parameters from query
     from_date = request.args.get('from')
@@ -376,3 +350,4 @@ def live_data():
 if __name__ == "__main__":
     # run the flask app on specified host and port
     app.run(host='0.0.0.0', port=8080)
+

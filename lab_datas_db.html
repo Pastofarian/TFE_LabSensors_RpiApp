@@ -105,7 +105,7 @@
               </select>
             </div>
 
-            <!-- Inputs datetime and timezone -->
+            <!-- inputs datetime and timezone -->
             <label for="from">Depuis le</label>
             <input class="u-full-width" id="datetimepicker1" type="text"
                    value="{{ start_date }}" name="from" style="color:black;" />
@@ -210,7 +210,6 @@
         </table>
       </div>
     </div>
-
     <!-- load scripts -->
     <script src="//code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet"
@@ -218,70 +217,25 @@
           href="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.css"/>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.9/jquery.datetimepicker.full.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.7/jstz.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
 
     <script>
+      // variables injected server side
+      var node = "{{ node }}";
+      var start_date = "{{ start_date }}";
+      var end_date = "{{ end_date }}";
+      var range_time = "{{ range_time }}";
+      var timezone = "{{ timezone }}";
+      var selected_interval = "{{ selected_interval }}";
+
       // handle dark mode on page load
       var darkMode = (localStorage.getItem('darkMode') === 'true');
       if (darkMode) {
         document.body.classList.add('dark-mode');
       }
-    </script>
 
-    <script>
-      jQuery(document).ready(function() {
-
-        // initialize datetimepicker
-        jQuery('#datetimepicker1').datetimepicker({
-          format: 'd-m-Y H:i:s'
-        });
-        jQuery('#datetimepicker2').datetimepicker({
-          format: 'd-m-Y H:i:s'
-        });
-
-        // format date to DMY
-        function formatDateDMY(date) {
-          const day = String(date.getDate()).padStart(2, '0');
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const year = date.getFullYear();
-          const hours = String(date.getHours()).padStart(2, '0');
-          const minutes = String(date.getMinutes()).padStart(2, '0');
-          const seconds = String(date.getSeconds()).padStart(2, '0');
-          return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-        }
-
-        // handle node selection
-        jQuery('#node-select').change(function() {
-          jQuery("#data_selection").submit();
-        });
-
-        // handle range selection
-        jQuery('#range-select').change(function() {
-          const range = jQuery('#range-select').val();
-          const now = new Date();
-          const fromDate = new Date(now.getTime() - (range * 3600 * 1000));
-
-          // update datetimepicker values
-          jQuery("#datetimepicker1").val(formatDateDMY(fromDate));
-          jQuery("#datetimepicker2").val(formatDateDMY(now));
-
-          jQuery("#data_selection").submit();
-        });
-
-        // handle datetimepicker submit
-        jQuery("#data_selection").submit(function() {
-          const timezone = jstz.determine();
-          jQuery(".timezone").val(timezone.name());
-        });
-
-        // set current range
-        const currentRange = "{{ range_time }}";
-        jQuery("#range-select").val(currentRange);
-      });
-    </script>
-
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script>
-      // draw charts with google charts
+      // Google Charts config
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(createTempChart);
       google.charts.setOnLoadCallback(createHumChart);
@@ -385,281 +339,6 @@
       }
     </script>
 
-    <script>
-      var plotlyLink = null; // store plotly link once obtained
-
-      // handle live button
-      document.getElementById('btn-live').addEventListener('click', function() {
-        window.location.href = "/lab_datas?node={{ node }}";
-      });
-
-      // handle plotly button
-      document.getElementById('btn-plotly').addEventListener('click', function() {
-        var btnPlotly = this;
-
-        // if plotly link already present, just open
-        if (plotlyLink) {
-          window.open(plotlyLink, "_blank");
-          return;
-        }
-
-        // generate plotly link if not present
-        btnPlotly.classList.add('clicked');
-        btnPlotly.textContent = "...envoie";
-
-        jQuery.get("/to_plotly", {
-          from: "{{ start_date }}",
-          to: "{{ end_date }}",
-          timezone: "{{timezone}}",
-          node: "{{ node }}"
-        })
-        .done(function(data) {
-          // update button text and store plotly link
-          plotlyLink = data;
-          btnPlotly.textContent = "Afficher";
-          btnPlotly.classList.remove('clicked');
-        })
-        .fail(function() {
-          // handle failure
-          btnPlotly.textContent = "Erreur";
-          btnPlotly.classList.remove('clicked');
-        });
-      });
-
-      // handle interval dropdown menu
-      var intervalBtn = document.getElementById('interval-btn');
-      var intervalDropdown = document.getElementById('interval-dropdown');
-
-      intervalBtn.addEventListener('click', function() {
-        // toggle dropdown display
-        if(intervalDropdown.style.display === 'none' || intervalDropdown.style.display === '') {
-          intervalDropdown.style.display = 'block';
-        } else {
-          intervalDropdown.style.display = 'none';
-        }
-      });
-
-      // handle interval selection
-      var options = intervalDropdown.querySelectorAll('div[data-value]');
-      options.forEach(function(opt) {
-        opt.addEventListener('click', function() {
-          var val = this.getAttribute('data-value');
-          // update button text
-          intervalBtn.textContent = "Intervale " + val;
-
-          // hide dropdown
-          intervalDropdown.style.display = 'none';
-
-          // update cron with ajax request
-          jQuery.post("/update_cron", { interval: val })
-          .done(function(response) {
-            console.log("Cron updated with interval:", response.selected_interval);
-          })
-          .fail(function() {
-            console.log("error updating cron");
-          });
-        });
-      });
-    </script>
-
-    <script>
-      // redraw charts on theme change
-      function drawAllCharts() {
-        createTempChart();
-        createHumChart();
-        createPressChart();
-        initGauges();
-      }
-
-      // handle theme toggle
-      document.getElementById('btn-mode').addEventListener('click', function() {
-        darkMode = !darkMode;
-        if (darkMode) {
-          document.body.classList.add('dark-mode');
-        } else {
-          document.body.classList.remove('dark-mode');
-        }
-        localStorage.setItem('darkMode', darkMode);
-        drawAllCharts();
-      });
-    </script>
-
-    <script>
-      // handle current time display
-      $(document).ready(function () {
-        function currentTime() {
-          var date = new Date();
-          var day = date.getDay();
-          var hour = date.getHours();
-          var min = date.getMinutes();
-          var sec = date.getSeconds();
-          var month = date.getMonth();
-          var currDate = date.getDate();
-          var year = date.getFullYear();
-
-          var jours = ["DIM","LUN","MAR","MER","JEU","VEN","SAM"];
-          var mois = [
-            "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet",
-            "Août", "Septembre", "Octobre", "Novembre", "Décembre"
-          ];
-
-          var midDay = "";
-          hour = updateTime(hour);
-          min = updateTime(min);
-          sec = updateTime(sec);
-          currDate = updateTime(currDate);
-
-          $("#time").html(`${hour}:${min}`);
-          $("#sec").html(`${sec}`);
-          $("#med").html(`${midDay}`);
-          $("#full-date").html(`${currDate} ${mois[month]} ${year}`);
-
-          var showDay = $(".dayDiv span");
-          showDay.css("opacity", "0.4");
-          showDay.eq(day).css("opacity", "1");
-          showDay.eq(day).text(jours[day]);
-        }
-
-        function updateTime(x) {
-          return x < 10 ? "0" + x : x;
-        }
-
-        setInterval(currentTime, 1000);
-        currentTime();
-      });
-    </script>
-
-    <script>
-      // handle chrono and timer logic
-      $(document).ready(function () {
-        let mode = "chrono";
-        let timerInterval;
-        let totalSeconds = 0;
-        let timerDuration = 30 * 60;
-        let running = false;
-
-        function setEditable(isEditable) {
-          $("#chrono-timer-display").attr("contenteditable", isEditable);
-        }
-
-        // format time in HH:MM:SS
-        function formatTime(seconds) {
-          const h = Math.floor(seconds / 3600);
-          const m = Math.floor((seconds % 3600) / 60);
-          const s = seconds % 60;
-          return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-        }
-
-        function updateDisplay() {
-          // update chrono or timer display
-          if (mode === "chrono") {
-            $("#chrono-timer-display").html(formatTime(totalSeconds));
-          } else {
-            const remaining = timerDuration - totalSeconds;
-            $("#chrono-timer-display").html(formatTime(Math.max(remaining,0)));
-          }
-
-          // update mode button text
-          if (mode === "chrono") {
-            $("#switch-mode").text("Minuteur");
-          } else {
-            $("#switch-mode").text("Chrono");
-          }
-
-          // update start button text
-          if (running) {
-            $("#start-button").text("Stop");
-          } else {
-            $("#start-button").text("Start");
-          }
-        }
-
-        $("#reset-button").click(function() {
-          resetTimer();
-        });
-
-        function stopTimer() {
-          clearInterval(timerInterval);
-          timerInterval = null;
-          running = false;
-          updateDisplay();
-        }
-
-        function startTimer() {
-          stopTimer();
-          running = true;
-          timerInterval = setInterval(() => {
-            totalSeconds++;
-            if (mode === "timer" && totalSeconds >= timerDuration) {
-              stopTimer();
-            }
-            updateDisplay();
-          }, 1000);
-          updateDisplay();
-        }
-
-        function resetTimer() {
-          stopTimer();
-          totalSeconds = 0;
-          if (mode === "timer") {
-            timerDuration = 1800;
-            $("#chrono-timer-display").html(formatTime(timerDuration));
-          } else {
-            $("#chrono-timer-display").html("00:00:00");
-          }
-          updateDisplay();
-        }
-
-        function timeToSeconds(timeStr) {
-          const parts = timeStr.split(":").map(Number);
-          let sec = 0;
-          if (parts.length === 3) {
-            sec = parts[0]*3600 + parts[1]*60 + parts[2];
-          } else if (parts.length === 2) {
-            sec = parts[0]*60 + parts[1];
-          } else if (parts.length === 1) {
-            sec = parts[0];
-          }
-          return sec;
-        }
-
-        $("#switch-mode").click(function () {
-          resetTimer();
-          mode = (mode === "chrono") ? "timer" : "chrono";
-          if (mode === "timer") {
-            setEditable(true);
-            $("#chrono-timer-display").html("00:30:00");
-          } else {
-            setEditable(false);
-            $("#chrono-timer-display").html("00:00:00");
-          }
-          updateDisplay();
-        });
-
-        $("#start-button").click(function() {
-          if (!running) {
-            if (mode === "timer") {
-              const val = $("#chrono-timer-display").text().trim();
-              const sec = timeToSeconds(val);
-              if (sec > 0) {
-                timerDuration = sec;
-              } else {
-                timerDuration = 1800;
-                $("#chrono-timer-display").html("00:30:00");
-              }
-              totalSeconds = 0;
-            }
-            startTimer();
-          } else {
-            stopTimer();
-          }
-        });
-
-        setEditable(false);
-        updateDisplay();
-      });
-    </script>
-
     {% if combined_data|length > 0 %}
     <script>
       // get the last value from DB
@@ -692,110 +371,10 @@
     </script>
     {% endif %}
 
-    <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
-    <script>
-      function getGaugeOptions(type, darkMode) {
-        let staticZones;
-        let staticLabels;
-
-        let labelColor = darkMode ? "#ffffff" : "#000000";
-        let pointerColor = darkMode ? "#ffffff" : "#000000";
-
-        if (type === 'temp') {
-          // temperature gauge options
-          staticZones = [
-            { strokeStyle: "rgba(244,67,54,0.8)", min: 10,  max: 13 },
-            { strokeStyle: "rgba(255,193,7,0.8)", min: 13,  max: 17 },
-            { strokeStyle: "rgba(76,175,80,0.8)", min: 17,  max: 23 },
-            { strokeStyle: "rgba(255,193,7,0.8)", min: 23,  max: 30 },
-            { strokeStyle: "rgba(244,67,54,0.8)", min: 30,  max: 35 }
-          ];
-          staticLabels = {
-            font: "12px sans-serif",
-            labels: [10, 13, 17, 23, 30, 35],
-            color: labelColor,
-            fractionDigits: 0
-          };
-        } else if (type === 'hum') {
-          // humidity gauge options
-          staticZones = [
-            { strokeStyle: "rgba(244,67,54,0.8)", min: 20,  max: 25 },
-            { strokeStyle: "rgba(255,193,7,0.8)", min: 25,  max: 40 },
-            { strokeStyle: "rgba(76,175,80,0.8)", min: 40,  max: 60 },
-            { strokeStyle: "rgba(255,193,7,0.8)", min: 60,  max: 80 },
-            { strokeStyle: "rgba(244,67,54,0.8)", min: 80,  max: 85 }
-          ];
-          staticLabels = {
-            font: "12px sans-serif",
-            labels: [20,25,40,60,80,85],
-            color: labelColor,
-            fractionDigits: 0
-          };
-        } else if (type === 'press') {
-          // pressure gauge options
-          staticZones = [
-            { strokeStyle: "rgba(244,67,54,0.8)", min: 955, max: 960 },
-            { strokeStyle: "rgba(255,193,7,0.8)", min: 960, max: 990 },
-            { strokeStyle: "rgba(76,175,80,0.8)", min: 990, max: 1030 },
-            { strokeStyle: "rgba(255,193,7,0.8)", min: 1030, max: 1070 },
-            { strokeStyle: "rgba(244,67,54,0.8)", min: 1070, max: 1075 }
-          ];
-          staticLabels = {
-            font: "12px sans-serif",
-            labels: [955,990,1030,1075],
-            color: labelColor,
-            fractionDigits: 0
-          };
-        }
-
-        return {
-          angle: -0.6,
-          lineWidth: 0.2,
-          radiusScale: 0.8,
-          pointer: {
-            length: 0.6,
-            strokeWidth: 0.035,
-            color: pointerColor,
-          },
-          limitMax: false,
-          limitMin: false,
-          highDpiSupport: true,
-          staticZones: staticZones,
-          staticLabels: staticLabels
-        };
-      }
-
-      function initGauges() {
-        var tempOpts = getGaugeOptions('temp', darkMode);
-        var gaugeTemp = new Gauge(document.getElementById("gauge_temp")).setOptions(tempOpts);
-        gaugeTemp.maxValue = 40;
-        gaugeTemp.setMinValue(0);
-        gaugeTemp.animationSpeed = 32;
-        gaugeTemp.set(currentTemp);
-        document.getElementById("temp-value").textContent = currentTemp.toFixed(1) + " °C";
-
-        var humOpts = getGaugeOptions('hum', darkMode);
-        var gaugeHum = new Gauge(document.getElementById("gauge_hum")).setOptions(humOpts);
-        gaugeHum.maxValue = 100;
-        gaugeHum.setMinValue(0);
-        gaugeHum.animationSpeed = 32;
-        gaugeHum.set(currentHum);
-        document.getElementById("hum-value").textContent = currentHum.toFixed(1) + " %";
-
-        var pressOpts = getGaugeOptions('press', darkMode);
-        var gaugePress = new Gauge(document.getElementById("gauge_press")).setOptions(pressOpts);
-        gaugePress.maxValue = 1100;
-        gaugePress.setMinValue(900);
-        gaugePress.animationSpeed = 32;
-        gaugePress.set(currentPress);
-        document.getElementById("press-value").textContent = currentPress.toFixed(2) + " hPa";
-      }
-
-      document.addEventListener("DOMContentLoaded", function() {
-        initGauges();
-      });
-    </script>
+          <!-- JS -->
+    <script src="/static/js/lab_datas_db.js"></script>
 
   </body>
 </html>
+
 
