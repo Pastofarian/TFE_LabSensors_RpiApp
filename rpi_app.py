@@ -27,9 +27,9 @@ def main_page():
 @app.route("/lab_datas")
 def lab_datas():
     # get node from query, default '1'
-    node = request.args.get('node', '1')
+    node = request.args.get('node', '7')
     # if node=1, read sensor directly, else fetch from db
-    if node == '1':
+    if node == '7':
         try:
             data = bme280.sample(bus, address, calibration_params)
             temperature = data.temperature
@@ -195,7 +195,7 @@ def get_datas():
     to_date = request.args.get('to')
     timezone = request.args.get('timezone', 'Europe/Brussels')
     range_time_form = request.args.get('range_time', '')
-    node = request.args.get('node', '1')
+    node = request.args.get('node', '7')
 
     # if from/to not provided, use last 24h as default
     if not from_date:
@@ -349,8 +349,8 @@ def check_date(d):
 @app.route("/live_data", methods=["GET"])
 def live_data():
     # read sensor without storing in db
-    node = request.args.get('node', '1')
-    if node == '1':
+    node = request.args.get('node', '7')
+    if node == '7':
         try:
             data = bme280.sample(bus, address, calibration_params)
             temperature = data.temperature

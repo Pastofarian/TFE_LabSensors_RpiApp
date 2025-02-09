@@ -79,10 +79,9 @@ try:
     pressure = data.pressure
     # insert data into the db and Google Sheets
     if humidity is not None and temperature is not None and pressure is not None:
-        log_datas("1", temperature, humidity, pressure)
+        log_datas("7", temperature, humidity, pressure)
     else:
-        log_datas("1", -999, -999, -999)
+        log_datas("7", -999, -999, -999)
 except Exception as e:
     print(f"Erreur lors de la lecture du capteur : {e}")
-    log_datas("1", -999, -999, -999)
-
+    log_datas("7", -999, -999, -999)

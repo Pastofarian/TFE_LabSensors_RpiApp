@@ -11,13 +11,13 @@
     <link rel="stylesheet" href="/assets/css/normalize.css">
     <link rel="stylesheet" href="/assets/css/skeleton.css">
 
-    <!-- BALISE QUI APPELLE TON FICHIER CSS -->
+    <!-- css -->
     <link rel="stylesheet" href="/static/css/lab_datas_db.css">
 
     <link rel="icon" type="image/png" href="/static/images/chart-1024.png">
   </head>
   <body>
-    <!-- render top header with controls -->
+    <!-- top header with controls -->
     <div class="top-header">
       <h1 class="dashboard-title">
         <span class="title-icon">📊</span> Dashboard laboratoire acoustique
@@ -50,7 +50,7 @@
 
     <div class="layout-container">
       <div class="left-column">
-        <!-- render digital clock and chrono/timer in a flex container -->
+        <!-- digital clock and chrono/timer in a flex container -->
         <div class="clock-chrono-container">
           <div id="digital-clock" class="content digital-clock-center">
             <div class="timeDiv">
@@ -59,13 +59,13 @@
               <span class="font-color" id="med"></span>
             </div>
             <div class="dayDiv">
+              <span class="font-color day">Dim</span>
               <span class="font-color day">Lun</span>
               <span class="font-color day">Mar</span>
               <span class="font-color day">Mer</span>
               <span class="font-color day">Jeu</span>
               <span class="font-color day">Ven</span>
               <span class="font-color day">Sam</span>
-              <span class="font-color day">Dim</span>
             </div>
             <span class="font-color" id="full-date"></span>
           </div>
@@ -156,7 +156,7 @@
         </div>
         {% endif %}
 
-        <!-- render gauges -->
+        <!-- gauges -->
         <div id="gauges-container" class="gauges-container">
           <div class="text-center">
             <div class="gauge-value" id="temp-value"></div>
@@ -173,7 +173,7 @@
         </div>
       </div>
 
-      <!-- render graphs -->
+      <!-- graphs -->
       <div class="middle-column">
         <h2>Graphiques</h2>
         <div id="graph_temp"></div>
@@ -181,7 +181,7 @@
         <div id="graph_press"></div>
       </div>
 
-      <!-- render historical data -->
+      <!-- historical data -->
       <div class="right-column">
         <h2>Données historiques</h2>
         <h3>Température, humidité, pression</h3>
@@ -798,3 +798,4 @@
 
   </body>
 </html>
+
