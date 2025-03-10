@@ -18,7 +18,7 @@ class RpiBackendTestCase(unittest.TestCase):
         # test /lab_datas endpoint for node 7
         response = self.client.get('/lab_datas?node=7')
         self.assertEqual(response.status_code, 200)
-        # check for known text in html (e.g., 'cellule')
+        # check for known text in html (for exemple 'cellule')
         self.assertIn(b"cellule", response.data)
 
     def test_live_data(self):

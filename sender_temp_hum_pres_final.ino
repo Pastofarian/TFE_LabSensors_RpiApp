@@ -68,21 +68,19 @@ void take_sensor_reading_and_send() {
   BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
   BME280::PresUnit presUnit(BME280::PresUnit_hPa);
 
-  // Lire les données du capteur
+  // read datas from sensor
   bme.read(pres, temp, hum, tempUnit, presUnit);
 
-  // Préparer le message
+  // prepare message
   String message = String(millis()) + "," + String(temp, 2) + "," +
                    String(hum, 2) + "," + String(pres, 2) + "," +
-                   String(this_device_id) + ",999"; // '999' comme marqueur de fin
-  message.toCharArray(message_buffer, message.length() + 1); // Convertir String en tableau de char
+                   String(this_device_id) + ",999"; // '999' end marker
+  message.toCharArray(message_buffer, message.length() + 1); // Convert string in char array
 
-  // Transmettre le message via HC-12
+  // transmit message with hc12
   HC12.println(message_buffer);  
 
-  // Affichage des données pour le débogage
+  // Display errors
   Serial.print("Sent message: ");
   Serial.println(message);
 }
-
-
