@@ -1,4 +1,5 @@
-
+import logging
+import subprocess
 from flask import Flask, request, render_template, abort, jsonify
 import datetime
 import sqlite3
@@ -12,6 +13,17 @@ import gspread
 import sys
 from oauth2client.service_account import ServiceAccountCredentials
 
+# logging configuration
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+
+# alternative to os.system
+def update_cron_secure(cron_file):
+    try:
+        subprocess.run(["crontab", cron_file], check=True, capture_output=True, text=True)
+        logging.info("cron updated successfully using %s", cron_file)
+    except subprocess.CalledProcessError as e:
+        logging.error("cron update failed: %s", e.stderr)
+
 # manage sensor reading from bme280
 class SensorReader:
     def __init__(self):
@@ -20,7 +32,7 @@ class SensorReader:
         self.bus = smbus2.SMBus(self.port)
         # load calibration parameters for bme280
         self.calibration_params = bme280.load_calibration_params(self.bus, self.address)
-        # read actual sensor values
+    # read actual sensor values
     def read_sensor(self):
         data = bme280.sample(self.bus, self.address, self.calibration_params)
         return {"temperature": data.temperature, "humidity": data.humidity, "pressure": data.pressure}
@@ -28,44 +40,55 @@ class SensorReader:
 # manage db connections and queries
 class DatabaseManager:
     def __init__(self):
-        self.db_path = '/var/www/rpi_app/rpi_app.db'
-        
-        # get last recorded values for a sensor
+        self.db_path = os.environ["DB_PATH"]
+    # get last recorded values for a sensor
     def fetch_latest(self, sensor_id):
-        conn = sqlite3.connect(self.db_path)
-        curs = conn.cursor()
-        curs.execute("SELECT * FROM temperatures WHERE sensor_id=? ORDER BY timestamp DESC LIMIT 1", (sensor_id,))
-        temp_data = curs.fetchone()
-        curs.execute("SELECT * FROM humidities WHERE sensor_id=? ORDER BY timestamp DESC LIMIT 1", (sensor_id,))
-        hum_data = curs.fetchone()
-        curs.execute("SELECT * FROM pressures WHERE sensor_id=? ORDER BY timestamp DESC LIMIT 1", (sensor_id,))
-        pres_data = curs.fetchone()
-        conn.close()
-        if temp_data and hum_data and pres_data:
-            return {"temperature": temp_data[2], "humidity": hum_data[2], "pressure": pres_data[2]}
-        return {"temperature": None, "humidity": None, "pressure": None}
+        try:
+            conn = sqlite3.connect(self.db_path)
+            curs = conn.cursor()
+            curs.execute("SELECT * FROM temperatures WHERE sensor_id=? ORDER BY timestamp DESC LIMIT 1", (sensor_id,))
+            temp_data = curs.fetchone()
+            curs.execute("SELECT * FROM humidities WHERE sensor_id=? ORDER BY timestamp DESC LIMIT 1", (sensor_id,))
+            hum_data = curs.fetchone()
+            curs.execute("SELECT * FROM pressures WHERE sensor_id=? ORDER BY timestamp DESC LIMIT 1", (sensor_id,))
+            pres_data = curs.fetchone()
+            conn.close()
+            if temp_data and hum_data and pres_data:
+                return {"temperature": temp_data[2], "humidity": hum_data[2], "pressure": pres_data[2]}
+            return {"temperature": None, "humidity": None, "pressure": None}
+        except Exception as e:
+            logging.error("error in fetch_latest: %s", e)
+            return {"temperature": None, "humidity": None, "pressure": None}
     
     # get historical data for a choosen sensor and date range
     def fetch_data(self, sensor_id, from_date, to_date):
-        conn = sqlite3.connect(self.db_path)
-        curs = conn.cursor()
-        curs.execute("SELECT * FROM temperatures WHERE timestamp BETWEEN ? AND ? AND sensor_id = ?", (from_date, to_date, sensor_id))
-        temperatures = curs.fetchall()
-        curs.execute("SELECT * FROM humidities WHERE timestamp BETWEEN ? AND ? AND sensor_id = ?", (from_date, to_date, sensor_id))
-        humidities = curs.fetchall()
-        curs.execute("SELECT * FROM pressures WHERE timestamp BETWEEN ? AND ? AND sensor_id = ?", (from_date, to_date, sensor_id))
-        pressures = curs.fetchall()
-        conn.close()
-        return temperatures, humidities, pressures
-     # insert current sensor data into the db
+        try:
+            conn = sqlite3.connect(self.db_path)
+            curs = conn.cursor()
+            curs.execute("SELECT * FROM temperatures WHERE timestamp BETWEEN ? AND ? AND sensor_id = ?", (from_date, to_date, sensor_id))
+            temperatures = curs.fetchall()
+            curs.execute("SELECT * FROM humidities WHERE timestamp BETWEEN ? AND ? AND sensor_id = ?", (from_date, to_date, sensor_id))
+            humidities = curs.fetchall()
+            curs.execute("SELECT * FROM pressures WHERE timestamp BETWEEN ? AND ? AND sensor_id = ?", (from_date, to_date, sensor_id))
+            pressures = curs.fetchall()
+            conn.close()
+            return temperatures, humidities, pressures
+        except Exception as e:
+            logging.error("error in fetch_data: %s", e)
+            return ([], [], [])
+    
+    # insert current sensor data into the db
     def insert_data(self, sensor_id, temperature, humidity, pressure):
-        conn = sqlite3.connect(self.db_path)
-        curs = conn.cursor()
-        curs.execute("INSERT INTO temperatures (timestamp, sensor_id, temperature) VALUES (datetime(CURRENT_TIMESTAMP, 'localtime'), ?, ?)", (sensor_id, temperature))
-        curs.execute("INSERT INTO humidities (timestamp, sensor_id, humidities) VALUES (datetime(CURRENT_TIMESTAMP, 'localtime'), ?, ?)", (sensor_id, humidity))
-        curs.execute("INSERT INTO pressures (timestamp, sensor_id, pressure) VALUES (datetime(CURRENT_TIMESTAMP, 'localtime'), ?, ?)", (sensor_id, pressure))
-        conn.commit()
-        conn.close()
+        try:
+            conn = sqlite3.connect(self.db_path)
+            curs = conn.cursor()
+            curs.execute("INSERT INTO temperatures (timestamp, sensor_id, temperature) VALUES (datetime(CURRENT_TIMESTAMP, 'localtime'), ?, ?)", (sensor_id, temperature))
+            curs.execute("INSERT INTO humidities (timestamp, sensor_id, humidities) VALUES (datetime(CURRENT_TIMESTAMP, 'localtime'), ?, ?)", (sensor_id, humidity))
+            curs.execute("INSERT INTO pressures (timestamp, sensor_id, pressure) VALUES (datetime(CURRENT_TIMESTAMP, 'localtime'), ?, ?)", (sensor_id, pressure))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logging.error("error in insert_data: %s", e)
 
 # log to google sheets
 class GoogleSheetsLogger:
@@ -75,7 +98,7 @@ class GoogleSheetsLogger:
             raise ValueError(
                 "La variable d'environnement GOOGLE_CREDENTIALS_PATH "
                 "n'est pas définie."
-            )  
+            )
     # add sensor data to google sheet
     def log(self, sensor_id, temperature, humidity, pressure):
         try:
@@ -85,8 +108,8 @@ class GoogleSheetsLogger:
             sheet = client.open('Temperature  and Humidity - Rpi').sheet1
             row = [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), sensor_id, round(temperature, 2), round(humidity, 2), round(pressure, 2)]
             sheet.append_row(row)
-        except Exception:
-            pass
+        except Exception as e:
+            logging.error("error logging to google sheets: %s", e)
 
 # read from sensor, write to db, and log to sheets
 class DataLogger:
@@ -101,7 +124,8 @@ class DataLogger:
             temperature = data.get("temperature")
             humidity = data.get("humidity")
             pressure = data.get("pressure")
-        except Exception:
+        except Exception as e:
+            logging.error("error reading sensor in log_all: %s", e)
             temperature = humidity = pressure = None
         # if sensor fails, mark values as -999
         if temperature is None or humidity is None or pressure is None:
@@ -144,7 +168,6 @@ class CronManager:
             "30min": "*/30 * * * *",
             "60min": "0 * * * *"
         }
-        
     # update cron interval based on user selection
     def update_interval(self, new_interval):
         if new_interval in self.interval_mapping:
@@ -155,11 +178,13 @@ class CronManager:
             self.selected_interval = "1min"
         command = "/var/www/rpi_app/bin/python /var/www/rpi_app/lab_datas.py"
         cron_content = f"{cron_line} {command}\n"
-        
-        # write cron config to file and load with crontab
-        with open("/tmp/my_cron_file", "w") as f:
-            f.write(cron_content)
-        os.system("crontab /tmp/my_cron_file")
+        try:
+             # write cron config to file and load with crontab
+            with open("/tmp/my_cron_file", "w") as f:
+                f.write(cron_content)
+            update_cron_secure("/tmp/my_cron_file")
+        except Exception as e:
+            logging.error("error updating cron: %s", e)
         return cron_content
 
 # main flask app manage routes and logic
@@ -194,7 +219,8 @@ class RpiBackend:
                     temperature = data.get("temperature")
                     humidity = data.get("humidity")
                     pressure = data.get("pressure")
-                except Exception:
+                except Exception as e:
+                    logging.error("error in /lab_datas reading sensor: %s", e)
                     temperature = humidity = pressure = None
             else:
                 result = self.db_manager.fetch_latest(node)
@@ -209,15 +235,18 @@ class RpiBackend:
             try:
                 temperatures, humidities, pressures, timezone, from_date, to_date, node = self.get_datas()
             except Exception as e:
-                print(f"Error in lab_datas_db: {e}")
+                logging.error("error in /lab_datas_db: %s", e)
                 abort(500)
             range_time = request.args.get('range_time', '')
             # calculate from_date/to_date if not specified
             if (not from_date or not to_date) and range_time.isdigit():
-                range_time_int = int(range_time)
-                now = arrow.now(timezone)
-                from_date = now.shift(hours=-range_time_int).format("YYYY-MM-DD HH:mm:ss")
-                to_date = now.format("YYYY-MM-DD HH:mm:ss")
+                try:
+                    range_time_int = int(range_time)
+                    now = arrow.now(timezone)
+                    from_date = now.shift(hours=-range_time_int).format("YYYY-MM-DD HH:mm:ss")
+                    to_date = now.format("YYYY-MM-DD HH:mm:ss")
+                except Exception as e:
+                    logging.error("error calculating dates with range_time: %s", e)
             elif not from_date or not to_date:
                 now = arrow.now(timezone)
                 from_date = now.shift(hours=-24).format("YYYY-MM-DD HH:mm:ss")
@@ -228,21 +257,30 @@ class RpiBackend:
             time_adjusted_humidities = []
             time_adjusted_pressures = []
             for record in temperatures:
-                local_timedate = arrow.get(record[0], "YYYY-MM-DD HH:mm:ss", tzinfo=timezone)
-                time_adjusted_temperatures.append([local_timedate.format('DD-MM-YYYY HH:mm:ss'), record[1], record[2]])
+                try:
+                    local_timedate = arrow.get(record[0], "YYYY-MM-DD HH:mm:ss", tzinfo=timezone)
+                    time_adjusted_temperatures.append([local_timedate.format('DD-MM-YYYY HH:mm:ss'), record[1], record[2]])
+                except Exception as e:
+                    logging.error("error processing temperature record: %s", e)
             for record in humidities:
-                local_timedate = arrow.get(record[0], "YYYY-MM-DD HH:mm:ss", tzinfo=timezone)
-                time_adjusted_humidities.append([local_timedate.format('DD-MM-YYYY HH:mm:ss'), record[1], record[2]])
+                try:
+                    local_timedate = arrow.get(record[0], "YYYY-MM-DD HH:mm:ss", tzinfo=timezone)
+                    time_adjusted_humidities.append([local_timedate.format('DD-MM-YYYY HH:mm:ss'), record[1], record[2]])
+                except Exception as e:
+                    logging.error("error processing humidity record: %s", e)
             for record in pressures:
-                local_timedate = arrow.get(record[0], "YYYY-MM-DD HH:mm:ss", tzinfo=timezone)
-                time_adjusted_pressures.append([local_timedate.format('DD-MM-YYYY HH:mm:ss'), record[1], record[2]])
+                try:
+                    local_timedate = arrow.get(record[0], "YYYY-MM-DD HH:mm:ss", tzinfo=timezone)
+                    time_adjusted_pressures.append([local_timedate.format('DD-MM-YYYY HH:mm:ss'), record[1], record[2]])
+                except Exception as e:
+                    logging.error("error processing pressure record: %s", e)
                 
             # combine data for stats    
             combined_data = []
             for t_row, h_row, p_row in zip(time_adjusted_temperatures, time_adjusted_humidities, time_adjusted_pressures):
                 combined_data.append({'date': t_row[0], 'temp': round(t_row[2], 1), 'humidity': round(h_row[2], 1), 'pressure': round(p_row[2], 2)})
             
-            # calculate min, max, and avg if I have data    
+            # calculate min, max, and avg if data exists    
             if len(combined_data) > 0:
                 temp_values = [d['temp'] for d in combined_data]
                 hum_values = [d['humidity'] for d in combined_data]
@@ -268,7 +306,7 @@ class RpiBackend:
             try:
                 temperatures, humidities, pressures, timezone, from_date, to_date, node = self.get_datas()
             except Exception as e:
-                print(f"Error generating plot: {e}")
+                logging.error("error in /to_plotly: %s", e)
                 abort(500)
             file_path = self.plotly_generator.generate_plot(temperatures, humidities, pressures, node)
             return file_path
@@ -282,9 +320,9 @@ class RpiBackend:
                 cron_line = self.cron_manager.update_interval(new_interval)
                 return jsonify({"status": "ok", "selected_interval": self.cron_manager.selected_interval, "applied_cron": cron_line})
             return jsonify({"status": "error", "message": "No interval provided"}), 400
-        @self.app.route("/live_data")
         
         # return live sensor data for the selected node
+        @self.app.route("/live_data")
         def live_data():
             node = request.args.get('node', '7')
             if node == '7':
@@ -293,12 +331,13 @@ class RpiBackend:
                     temperature = data.get("temperature")
                     humidity = data.get("humidity")
                     pressure = data.get("pressure")
-                except Exception:
+                except Exception as e:
+                    logging.error("error in /live_data: %s", e)
                     temperature = humidity = pressure = None
             else:
                 temperature = humidity = pressure = None
             return jsonify({"temp": temperature, "hum": humidity, "pres": pressure})
-        
+    
     # get data based on query parameters (date range, node, ...)    
     def get_datas(self):
         from_date = request.args.get('from')
@@ -314,7 +353,7 @@ class RpiBackend:
             range_time_int = int(range_time_form)
         except ValueError:
             range_time_int = None
-            print("range_time_form not valid")
+            logging.error("range_time_form not valid")
             
         # conversion of dates or fallback to defaults    
         if range_time_int is not None and not (from_date and to_date):
@@ -327,7 +366,7 @@ class RpiBackend:
                 arrow_from = arrow.get(from_date, "DD-MM-YYYY HH:mm:ss", tzinfo=timezone)
                 arrow_to = arrow.get(to_date, "DD-MM-YYYY HH:mm:ss", tzinfo=timezone)
             except Exception as e:
-                print(f"Error parsing dates: {e}")
+                logging.error("error parsing dates: %s", e)
                 arrow_from = arrow.now(timezone).floor('day')
                 arrow_to = arrow.now(timezone)
             from_date_str = arrow_from.format("YYYY-MM-DD HH:mm:ss")
